@@ -6,21 +6,24 @@ import os
 from generator import create_killfeed
 from rev_generator import create_rev_killfeed
 
+
 app = FastAPI()
 
-# Mount static and generated folders
-app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/generated", StaticFiles(directory="generated_killfeeds_v1"), name="generated")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app.mount("/static",StaticFiles(directory=os.path.join(BASE_DIR, "static")),name="static")
+app.mount("/generated",StaticFiles(directory=os.path.join(BASE_DIR, "generated_killfeeds_v1")),name="generated")
 
 # Setup Jinja2 templates
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
+
 
 # Load agent and weapon names once at startup
-AGENTS = [f[:-4] for f in os.listdir("assets/agents") if f.endswith(".png")]
-WEAPONS = [f[:-4] for f in os.listdir("assets/weapons") if f.endswith(".png")]
+AGENTS_DIR = os.path.join(BASE_DIR, "assets", "agents")
+WEAPONS_DIR = os.path.join(BASE_DIR, "assets", "weapons")
 
-print(AGENTS)
-print(WEAPONS)
+AGENTS = [f[:-4] for f in os.listdir(AGENTS_DIR) if f.endswith(".png")]
+WEAPONS = [f[:-4] for f in os.listdir(WEAPONS_DIR) if f.endswith(".png")]
+
 
 import time
 
@@ -77,7 +80,7 @@ async def generate_and_preview(
 
     if not error:
         # 🧹 Clean up old images
-        cleanup_old_images("generated_killfeeds_v1")
+        cleanup_old_images(os.path.join(BASE_DIR, "generated_killfeeds_v1"))
         if is_enemy_kill:
             # Use the reverse generator for enemy kills
             image_path = create_rev_killfeed(
@@ -132,7 +135,7 @@ async def generate_and_preview(
 
 @app.get("/download/{filename}")
 async def download_image(filename: str):
-    filepath = os.path.join("generated_killfeeds_v1", filename)
+    filepath = os.path.join(BASE_DIR, "generated_killfeeds_v1", filename)
     if not os.path.exists(filepath):
         return HTMLResponse("File not found", status_code=404)
     

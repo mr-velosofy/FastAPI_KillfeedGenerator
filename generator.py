@@ -5,9 +5,12 @@ import time
 
 # --- Configuration ---
 # Define paths to your asset and output folders
-ASSETS_PATH = 'assets'
-OUTPUT_PATH = 'generated_killfeeds_v1'
-FONT_PATH = os.path.join(ASSETS_PATH, 'fonts', 'dinnextw1g_medium.otf') # <-- IMPORTANT: Change this to your font file name
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+ASSETS_PATH = os.path.join(BASE_DIR, "assets")
+OUTPUT_PATH = os.path.join(BASE_DIR, "generated_killfeeds_v1")
+FONT_PATH = os.path.join(ASSETS_PATH, "fonts", "dinnextw1g_medium.otf")
+
 
 # Create the output directory if it doesn't exist
 if not os.path.exists(OUTPUT_PATH):
