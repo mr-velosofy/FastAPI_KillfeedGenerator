@@ -38,6 +38,9 @@ def cleanup_old_images(folder: str, age_seconds: int = 180):
 
 
 
+@app.get("/ping")
+async def ping():
+    return {"message": "pong"}
 
 @app.get("/", response_class=HTMLResponse)
 async def form_page(request: Request):
