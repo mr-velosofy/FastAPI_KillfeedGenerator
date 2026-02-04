@@ -10,6 +10,9 @@ from rev_generator import create_rev_killfeed
 app = FastAPI()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+print("BASE_DIR:", BASE_DIR)
+print("FILES:", os.listdir(BASE_DIR))
+
 app.mount("/static",StaticFiles(directory=os.path.join(BASE_DIR, "static")),name="static")
 app.mount("/generated",StaticFiles(directory=os.path.join(BASE_DIR, "generated_killfeeds_v1")),name="generated")
 
