@@ -1,5 +1,5 @@
-fastapi
 uvicorn
+fastapi
 jinja2
 python-multipart
 pillow
