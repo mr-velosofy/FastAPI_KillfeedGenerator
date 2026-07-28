@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import os
+import time
 from generator import create_killfeed
 from rev_generator import create_rev_killfeed
 
@@ -31,8 +32,13 @@ WEAPONS = sorted([os.path.join("weapons", f) for f in os.listdir(WEAPONS_DIR) if
 ABILITIES = sorted([os.path.join("abilities", f) for f in os.listdir(ABILITIES_DIR) if f.endswith(".png")])
 SPECIAL = sorted([os.path.join("special", f) for f in os.listdir(SPECIAL_DIR) if f.endswith(".png")])
 
+# Auto cache-busting for static assets
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+CSS_PATH = os.path.join(STATIC_DIR, "style.css")
 
-import time
+def get_css_version():
+    return str(int(time.time()))
+
 
 def cleanup_old_images(folder: str, age_seconds: int = 180):
     now = time.time()
@@ -64,6 +70,7 @@ async def form_page(request: Request):
         "weapons": WEAPONS,
         "abilities": ABILITIES,
         "special": SPECIAL,
+        "css_version": get_css_version(),
         "image_url": None,
         "error": None,
     },
@@ -148,6 +155,7 @@ async def generate_and_preview(
         "weapons": WEAPONS,
         "abilities": ABILITIES,
         "special": SPECIAL,
+        "css_version": get_css_version(),
         "image_url": image_url,
         "image_filename": image_filename,
         "error": error,
