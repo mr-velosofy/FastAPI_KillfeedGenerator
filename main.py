@@ -51,14 +51,17 @@ async def ping():
 @app.get("/", response_class=HTMLResponse)
 async def form_page(request: Request):
     # ✅ Pass an empty form dict to avoid Jinja errors
-    return templates.TemplateResponse("form.html", {
-        "request": request,
-        "form": {},  # <-- this is what fixes your crash
+    return templates.TemplateResponse(
+    request=request,
+    name="form.html",
+    context={
+        "form": {},
         "agents": AGENTS,
         "weapons": WEAPONS,
         "image_url": None,
-        "error": None
-    })
+        "error": None,
+    }
+    )
 
 @app.post("/", response_class=HTMLResponse)
 async def generate_and_preview(
@@ -115,8 +118,10 @@ async def generate_and_preview(
 
 
     # ✅ Re-inject form data for repopulating fields after submit
-    return templates.TemplateResponse("form.html", {
-        "request": request,
+    return templates.TemplateResponse(
+    request=request,
+    name="form.html",
+    context={
         "agents": AGENTS,
         "weapons": WEAPONS,
         "image_url": image_url,
@@ -132,7 +137,7 @@ async def generate_and_preview(
             "is_headshot": is_headshot,
             "is_wallbang": is_wallbang,
             "is_player_kill": is_player_kill,
-            "is_enemy_kill": is_enemy_kill
+            "is_enemy_kill": is_enemy_kill,
         }
     })
 
