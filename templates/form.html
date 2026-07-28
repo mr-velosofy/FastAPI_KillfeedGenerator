@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KILLFEED GENERATOR</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">
@@ -120,6 +121,7 @@
       <a href="/download/{{ image_filename }}"><button class="val-btn preview-btn">Download</button></a>
     </div>
     {% endif %}
+    <div class="val-footer">made by mr_velosofy</div>
   </div>
 
   <script>
@@ -163,7 +165,7 @@
       });
     });
 
-    var submittedWeapon = {{ form.weapon | tojson }};
+    var submittedWeapon = {{ form.get("weapon", none) | tojson }};
     if (submittedWeapon) {
       activeTab = detectTab(submittedWeapon);
     }
