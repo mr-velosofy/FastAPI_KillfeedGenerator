@@ -90,7 +90,7 @@ def create_rev_killfeed(killer_name, victim_name, killer_agent, victim_agent, we
     try:
         killer_agent_img = Image.open(os.path.join(ASSETS_PATH, 'agents', killer_agent)).resize(AGENT_ICON_SIZE)
         victim_agent_img = Image.open(os.path.join(ASSETS_PATH, 'agents', victim_agent)).resize(AGENT_ICON_SIZE)
-        weapon_img = Image.open(os.path.join(ASSETS_PATH, 'weapons', weapon))
+        weapon_img = Image.open(os.path.join(ASSETS_PATH, weapon))
         # Resize weapon icon while maintaining aspect ratio
         ratio = WEAPON_ICON_HEIGHT / weapon_img.height
         weapon_img = weapon_img.resize((int(weapon_img.width * ratio), WEAPON_ICON_HEIGHT))
@@ -185,7 +185,7 @@ def create_rev_killfeed(killer_name, victim_name, killer_agent, victim_agent, we
     # Paste weapon icon
     weapon_y = int((IMG_HEIGHT - weapon_img.height) / 2)
     weapon_x = int(mid_point_x_weapon - (weapon_width / 2))
-    if "_weapon" in weapon.lower():
+    if weapon.replace("\\", "/").startswith("weapons/"):
         weapon_img = ImageOps.mirror(weapon_img)
     #scale and place weapon so the height of weapon is 120 and width is in same aspect ratio as height
     final_image.paste(weapon_img, (weapon_x, weapon_y), weapon_img)
@@ -296,7 +296,7 @@ def create_rev_killfeed(killer_name, victim_name, killer_agent, victim_agent, we
 
         final_output_filename = output_filename
         final_image.save(os.path.join(OUTPUT_PATH, final_output_filename), optimize=False)
-        print(f"✅ Applied Me Highlight (mirrored) to {os.path.join(OUTPUT_PATH, final_output_filename)}")
+        print(f"Applied Me Highlight (mirrored) to {os.path.join(OUTPUT_PATH, final_output_filename)}")
 
 
     if numeral:
@@ -318,7 +318,7 @@ def create_rev_killfeed(killer_name, victim_name, killer_agent, victim_agent, we
         # Save with new filename
         final_output_filename = output_filename
         final_image.save(os.path.join(OUTPUT_PATH, final_output_filename), optimize=False)
-        print(f"✅ Applied Numeral to {os.path.join(OUTPUT_PATH, final_output_filename)}")
+        print(f"Applied Numeral to {os.path.join(OUTPUT_PATH, final_output_filename)}")
     
     # --- Add Solid Background Shapes Underneath to Fix Transparency ---
 

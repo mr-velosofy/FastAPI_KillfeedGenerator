@@ -23,9 +23,13 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 # Load agent and weapon names once at startup
 AGENTS_DIR = os.path.join(BASE_DIR, "assets", "agents")
 WEAPONS_DIR = os.path.join(BASE_DIR, "assets", "weapons")
+ABILITIES_DIR = os.path.join(BASE_DIR, "assets", "abilities")
+SPECIAL_DIR = os.path.join(BASE_DIR, "assets", "special")
 
-AGENTS = [f[:-4] for f in os.listdir(AGENTS_DIR) if f.endswith(".png")]
-WEAPONS = [f[:-4] for f in os.listdir(WEAPONS_DIR) if f.endswith(".png")]
+AGENTS = sorted([f[:-4] for f in os.listdir(AGENTS_DIR) if f.endswith(".png")])
+WEAPONS = sorted([os.path.join("weapons", f) for f in os.listdir(WEAPONS_DIR) if f.endswith(".png")])
+ABILITIES = sorted([os.path.join("abilities", f) for f in os.listdir(ABILITIES_DIR) if f.endswith(".png")])
+SPECIAL = sorted([os.path.join("special", f) for f in os.listdir(SPECIAL_DIR) if f.endswith(".png")])
 
 
 import time
@@ -58,10 +62,13 @@ async def form_page(request: Request):
         "form": {},
         "agents": AGENTS,
         "weapons": WEAPONS,
+        "abilities": ABILITIES,
+        "special": SPECIAL,
         "image_url": None,
         "error": None,
-    }
-    )
+    },
+    headers={"Cache-Control": "no-cache, no-store, must-revalidate"}
+)
 
 @app.post("/", response_class=HTMLResponse)
 async def generate_and_preview(
@@ -80,12 +87,24 @@ async def generate_and_preview(
     numeral_valid_values = ['3', '4', '5', '6', '7']
     error = None
     image_url = None
+    image_filename = None
 
     if numeral and numeral not in numeral_valid_values:
         error = "Only values 3, 4, 5, 6, and 7 are allowed for Numeral."
 
     if not error:
-        # 🧹 Clean up old images
+        weapon_path = os.path.join(BASE_DIR, "assets", weapon)
+        killer_agent_path = os.path.join(AGENTS_DIR, killer_agent + ".png")
+        victim_agent_path = os.path.join(AGENTS_DIR, victim_agent + ".png")
+
+        if not os.path.isfile(weapon_path):
+            error = f"Weapon file not found: {os.path.basename(weapon_path)}. It may have been removed or renamed."
+        elif not os.path.isfile(killer_agent_path):
+            error = f"Killer agent image not found: {killer_agent}.png"
+        elif not os.path.isfile(victim_agent_path):
+            error = f"Victim agent image not found: {victim_agent}.png"
+
+    if not error:
         cleanup_old_images(os.path.join(BASE_DIR, "generated_killfeeds_v1"))
         if is_enemy_kill:
             # Use the reverse generator for enemy kills
@@ -94,7 +113,7 @@ async def generate_and_preview(
                 victim_name=victim_name,
                 killer_agent=killer_agent + ".png",
                 victim_agent=victim_agent + ".png",
-                weapon=weapon + ".png",
+                weapon=weapon,
                 is_headshot=is_headshot,
                 is_wallbang=is_wallbang,
                 is_player_kill=is_player_kill,
@@ -106,15 +125,18 @@ async def generate_and_preview(
                 victim_name=victim_name,
                 killer_agent=killer_agent + ".png",
                 victim_agent=victim_agent + ".png",
-                weapon=weapon + ".png",
+                weapon=weapon,
                 is_headshot=is_headshot,
                 is_wallbang=is_wallbang,
                 is_player_kill=is_player_kill,
                 numeral=numeral
             )
         
-        image_filename = os.path.basename(image_path)
-        image_url = f"/generated/{image_filename}"
+        if not image_path:
+            error = "Failed to generate image. Asset file not found."
+        else:
+            image_filename = os.path.basename(image_path)
+            image_url = f"/generated/{image_filename}"
 
 
     # ✅ Re-inject form data for repopulating fields after submit
@@ -124,6 +146,8 @@ async def generate_and_preview(
     context={
         "agents": AGENTS,
         "weapons": WEAPONS,
+        "abilities": ABILITIES,
+        "special": SPECIAL,
         "image_url": image_url,
         "image_filename": image_filename,
         "error": error,
@@ -139,7 +163,9 @@ async def generate_and_preview(
             "is_player_kill": is_player_kill,
             "is_enemy_kill": is_enemy_kill,
         }
-    })
+    },
+    headers={"Cache-Control": "no-cache, no-store, must-revalidate"}
+)
 
 @app.get("/download/{filename}")
 async def download_image(filename: str):
