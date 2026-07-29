@@ -179,6 +179,9 @@ def create_rev_killfeed(killer_name, victim_name, killer_agent, victim_agent, we
     # Paste victim agent icon (horizontally flipped)
     victim_agent_flipped = ImageOps.mirror(victim_agent_img)
     victim_agent_hightlight = Image.new('RGBA', victim_agent_flipped.size, (119, 233, 199, 255))
+    if is_player_kill:
+        victim_agent_hightlight = Image.new('RGBA', victim_agent_flipped.size, (231, 237, 131, 255))
+        
     final_image.paste(victim_agent_hightlight,(int(total_width - AGENT_ICON_SIZE[0] - 10), 0), victim_agent_flipped)
     final_image.paste(victim_agent_flipped, (int(total_width - AGENT_ICON_SIZE[0]), 0), victim_agent_flipped)
 

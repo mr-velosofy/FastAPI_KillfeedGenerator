@@ -170,6 +170,7 @@ def create_killfeed(killer_name, victim_name, killer_agent, victim_agent, weapon
     if is_player_kill:
         rect_width, rect_height = 120, 130
         yellow_rect = Image.new('RGBA', (rect_width, rect_height), (231, 237, 131, 255))
+        killer_agent_hightlight = Image.new('RGBA', killer_agent_img.size, (231, 237, 131, 255))
         final_image.paste(yellow_rect, (0 , 0))
         
     
