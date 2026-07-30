@@ -227,8 +227,8 @@ def create_killfeed(killer_name, victim_name, killer_agent, victim_agent, weapon
     
     
     #TEXT SHADOW
-    draw.text((killer_text_x + SHADOW_OFFSET[0], killer_text_y + SHADOW_OFFSET[1]),
-          killer_name, font=font, fill=SHADOW_COLOR)
+    # draw.text((killer_text_x + SHADOW_OFFSET[0], killer_text_y + SHADOW_OFFSET[1]),
+        #   killer_name, font=font, fill=SHADOW_COLOR)
     
     #MAIN TEXT
     draw.text((killer_text_x, killer_text_y), killer_name, font=font, fill=TEXT_COLOR)
@@ -238,8 +238,8 @@ def create_killfeed(killer_name, victim_name, killer_agent, victim_agent, weapon
     victim_text_x = int(total_width - AGENT_ICON_SIZE[0] - victim_name_width)
     
     #TEXT SHADOW
-    draw.text((victim_text_x + SHADOW_OFFSET[0], victim_text_y + SHADOW_OFFSET[1]),
-          victim_name, font=font, fill=SHADOW_COLOR)
+    # draw.text((victim_text_x + SHADOW_OFFSET[0], victim_text_y + SHADOW_OFFSET[1]),
+        #   victim_name, font=font, fill=SHADOW_COLOR)
     #MAIN TEXT
     draw.text((victim_text_x, victim_text_y), victim_name, font=font, fill=TEXT_COLOR)
 
