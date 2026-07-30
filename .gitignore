@@ -1,5 +1,3 @@
-generated_killfeeds_v1/
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -216,3 +214,28 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Project generated output
+generated_killfeeds_v1/
+
+# Local config
+.env.local
+
+# Scratch test scripts
+test*.py
+
+# Design reference
+ui.md
