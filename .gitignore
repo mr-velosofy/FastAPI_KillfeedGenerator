@@ -236,6 +236,7 @@ generated_killfeeds_v1/
 
 # Scratch test scripts
 test*.py
+compare_gen.py
 
 # Design reference
 ui.md
