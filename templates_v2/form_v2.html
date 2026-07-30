@@ -12,6 +12,7 @@
 </head>
 
 <body>
+  <div class="bg-overlay"></div>
   <div class="app">
 
     <!-- PREVIEW PANEL -->
@@ -129,7 +130,7 @@
       </form>
     </div>
 
-
+    <div class="footer-credit">made with &#x2764; by mr_velosofy</div>
 
   </div>
 
@@ -184,6 +185,66 @@
         wrapper.querySelector('.cdrop-trigger').addEventListener('click', function (e) {
           e.stopPropagation();
           toggleMenu(selectEl);
+        });
+        wrapper.querySelector('.cdrop-trigger').addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') {
+            closeAllDropdowns();
+            return;
+          }
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            var menu = wrapper.querySelector('.cdrop-menu');
+            if (menu) {
+              var hl = menu.querySelector('.cdrop-opt-highlight');
+              if (hl) { hl.click(); }
+            } else {
+              toggleMenu(selectEl);
+            }
+            return;
+          }
+          if (e.key.length === 1 && e.key >= 'a' && e.key <= 'z') {
+            e.preventDefault();
+            var menu = wrapper.querySelector('.cdrop-menu');
+            if (!menu) toggleMenu(selectEl);
+            menu = wrapper.querySelector('.cdrop-menu');
+            if (!menu) return;
+            var letter = e.key.toLowerCase();
+            // clear previous highlight
+            menu.querySelectorAll('.cdrop-opt-highlight').forEach(function (o) { o.classList.remove('cdrop-opt-highlight'); });
+            var opts = menu.querySelectorAll('.cdrop-opt');
+            // determine start index based on repeated letter
+            var startIdx = 0;
+            if (wrapper._lastLetter === letter && wrapper._lastMatchIdx >= 0) {
+              startIdx = wrapper._lastMatchIdx + 1;
+            }
+            var matchIdx = -1;
+            for (var i = startIdx; i < opts.length; i++) {
+              var txt = opts[i].textContent.trim().toLowerCase();
+              if (txt.charAt(0) === letter) {
+                matchIdx = i;
+                break;
+              }
+            }
+            // wrap around if no match from startIdx
+            if (matchIdx === -1) {
+              for (var i = 0; i < startIdx; i++) {
+                var txt = opts[i].textContent.trim().toLowerCase();
+                if (txt.charAt(0) === letter) {
+                  matchIdx = i;
+                  break;
+                }
+              }
+            }
+            if (matchIdx !== -1) {
+              opts[matchIdx].classList.add('cdrop-opt-highlight');
+              opts[matchIdx].scrollIntoView({ block: 'nearest' });
+              wrapper._lastLetter = letter;
+              wrapper._lastMatchIdx = matchIdx;
+            } else {
+              wrapper._lastLetter = letter;
+              wrapper._lastMatchIdx = -1;
+            }
+          }
         });
       }
 
