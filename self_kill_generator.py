@@ -15,6 +15,7 @@ WEAPON_ICON_HEIGHT = 90
 HEADSHOT_ICON_SIZE = (72, 72)
 PADDING = 40
 TEXT_PADDING = 70
+EDGE_GAP = int(TEXT_PADDING / 4)
 ME_SIZE = 128
 KILLER_BG_COLOR = (87, 222, 196)
 TEAL_HIGHLIGHT = (87, 222, 196)
@@ -86,7 +87,7 @@ def create_self_killfeed(name, agent, weapon,
     if is_wallbang:
         wb_img = unpremultiply(Image.open(os.path.join(ASSETS_PATH, "icons", "wallbang.png")).resize((72, 72)))
 
-    left_text_x = int(AGENT_ICON_SIZE[0] + TEXT_PADDING)
+    left_text_x = int(AGENT_ICON_SIZE[0] + EDGE_GAP)
     weapon_left = int(left_text_x + nw + TEXT_PADDING)
     weapon_end = weapon_left + ww
     if wb_img or hs_img:
@@ -97,7 +98,7 @@ def create_self_killfeed(name, agent, weapon,
         weapon_end += int(hs_img.width + 10)
     mx = int(weapon_end + PADDING)
     right_text_x = int(mx + TEXT_PADDING)
-    tw = int(right_text_x + nw + TEXT_PADDING + AGENT_ICON_SIZE[0])
+    tw = int(right_text_x + nw + EDGE_GAP + AGENT_ICON_SIZE[0])
 
     k_shape = [(0, 0), (mx - 20, 0), (mx, IMG_HEIGHT // 2), (mx - 20, IMG_HEIGHT), (0, IMG_HEIGHT)]
     v_shape = [(mx - 35, 0), (tw, 0), (tw, IMG_HEIGHT), (mx - 35, IMG_HEIGHT), (mx, IMG_HEIGHT // 2)]
