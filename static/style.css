@@ -1,6 +1,7 @@
 @font-face {
   font-family: 'RiotSans';
-  src: url('/static/fonts/RiotSans-Bold.ttf?v=1') format('truetype');
+  src: url('/static/fonts/RiotSans-Bold.woff2?v=2') format('woff2'),
+       url('/static/fonts/RiotSans-Bold.ttf?v=2') format('truetype');
   font-weight: bold;
   font-style: normal;
 }
