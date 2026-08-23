@@ -228,8 +228,9 @@ Desktop.ini
 *.swo
 *~
 
-# Project generated output
-generated_killfeeds_v1/
+# Project generated outputs
+generated_killfeeds/
+network_audit/
 
 # Local config
 .env.local
