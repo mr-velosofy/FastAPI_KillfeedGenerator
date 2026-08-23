@@ -15,10 +15,36 @@ app = FastAPI()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+
+class CachedStaticFiles(StaticFiles):
+    """Static files with 1-year browser caching (immutable-style)."""
+
+    async def get_response(self, path, scope):
+        response = await super().get_response(path, scope)
+        if response.status_code == 200:
+            response.headers["Cache-Control"] = "public, max-age=31536000"
+        return response
+
+
+app.mount("/static", CachedStaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 app.mount("/generated", StaticFiles(directory=os.path.join(BASE_DIR, "generated_killfeeds")), name="generated")
 
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
+
+
+# Startup-cached file versions for cache-busting URLs (changes only when the
+# file actually changes — unlike the old per-render timestamp busting)
+_version_cache = {}
+
+
+def file_version(relpath: str) -> int:
+    if relpath not in _version_cache:
+        fp = os.path.join(BASE_DIR, relpath)
+        try:
+            _version_cache[relpath] = int(os.stat(fp).st_mtime)
+        except OSError:
+            _version_cache[relpath] = 0
+    return _version_cache[relpath]
 
 AGENTS_DIR = os.path.join(BASE_DIR, "assets", "agents")
 WEAPONS_DIR = os.path.join(BASE_DIR, "assets", "weapons")
@@ -162,6 +188,7 @@ async def form_page(request: Request):
             "weapons": WEAPONS,
             "abilities": ABILITIES,
             "special": SPECIAL,
+            "css_version": file_version(os.path.join("static", "style.css")),
             "image_url": None,
             "error": None,
         },
@@ -251,6 +278,7 @@ async def generate_and_preview(
             "weapons": WEAPONS,
             "abilities": ABILITIES,
             "special": SPECIAL,
+            "css_version": file_version(os.path.join("static", "style.css")),
             "image_url": image_url,
             "image_filename": image_filename,
             "error": error,
