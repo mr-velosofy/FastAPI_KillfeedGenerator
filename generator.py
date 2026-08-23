@@ -178,7 +178,7 @@ def create_killfeed(killer_name, victim_name, killer_agent, victim_agent, weapon
 
     # Me triangle (skip if numeral present)
     if is_player_kill and not numeral:
-        tri = Image.open(os.path.join(ASSETS_PATH, "ui-v2", "MeBorderTriangle.png")).convert("RGBA")
+        tri = Image.open(os.path.join(ASSETS_PATH, "ui", "MeBorderTriangle.png")).convert("RGBA")
         tri = unpremultiply(tri)
         tri_yellow = Image.new("RGBA", tri.size, (*YELLOW, 255))
         tri_c = Image.new("RGBA", tri.size, (0, 0, 0, 0))
@@ -190,7 +190,7 @@ def create_killfeed(killer_name, victim_name, killer_agent, victim_agent, weapon
 
     # Numeral
     if numeral:
-        numeral_img = Image.open(os.path.join(ASSETS_PATH, "ui-v2", f"Numeral_{numeral}.png")).convert("RGBA")
+        numeral_img = Image.open(os.path.join(ASSETS_PATH, "ui", f"Numeral_{numeral}.png")).convert("RGBA")
         numeral_img = unpremultiply(numeral_img)
         new_width = canvas.width + numeral_img.width
         new_height = max(canvas.height, numeral_img.height)

@@ -176,7 +176,7 @@ def create_self_killfeed(name, agent, weapon,
         me_hl = Image.new("RGBA", mask_left.size, (*YELLOW, 255))
         canvas.paste(me_hl, (-30, 0), mask_left)
 
-        tri = Image.open(os.path.join(ASSETS_PATH, "ui-v2", "MeBorderTriangle.png")).convert("RGBA")
+        tri = Image.open(os.path.join(ASSETS_PATH, "ui", "MeBorderTriangle.png")).convert("RGBA")
         tri = unpremultiply(tri)
         tri_y = Image.new("RGBA", tri.size, (*YELLOW, 255))
         tri_c = Image.new("RGBA", tri.size, (0, 0, 0, 0))
@@ -191,7 +191,7 @@ def create_self_killfeed(name, agent, weapon,
         me_hl_r = Image.new("RGBA", mask_right.size, (*YELLOW, 255))
         canvas.paste(me_hl_r, (canvas.width - 600 + 30, 0), mask_right)
 
-        tri_r = Image.open(os.path.join(ASSETS_PATH, "ui-v2", "MeBorderTriangle.png")).convert("RGBA")
+        tri_r = Image.open(os.path.join(ASSETS_PATH, "ui", "MeBorderTriangle.png")).convert("RGBA")
         tri_r = tri_r.transpose(Image.FLIP_LEFT_RIGHT)
         tri_r = unpremultiply(tri_r)
         tri_ry = Image.new("RGBA", tri_r.size, (*YELLOW, 255))
@@ -204,7 +204,7 @@ def create_self_killfeed(name, agent, weapon,
 
     # Numeral — Rev_ variant
     if numeral:
-        numeral_img = Image.open(os.path.join(ASSETS_PATH, "ui-v2", f"Rev_Numeral_{numeral}.png")).convert("RGBA")
+        numeral_img = Image.open(os.path.join(ASSETS_PATH, "ui", f"Rev_Numeral_{numeral}.png")).convert("RGBA")
         numeral_img = unpremultiply(numeral_img)
         new_width = canvas.width + numeral_img.width
         new_height = max(canvas.height, numeral_img.height)

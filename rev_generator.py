@@ -179,7 +179,7 @@ def create_rev_killfeed(killer_name, victim_name, killer_agent, victim_agent, we
 
     # Me triangle — on RIGHT side for rev
     if is_player_kill:
-        tri = Image.open(os.path.join(ASSETS_PATH, "ui-v2", "MeBorderTriangle.png")).convert("RGBA")
+        tri = Image.open(os.path.join(ASSETS_PATH, "ui", "MeBorderTriangle.png")).convert("RGBA")
         tri = tri.transpose(Image.FLIP_LEFT_RIGHT)
         tri = unpremultiply(tri)
         tri_yellow = Image.new("RGBA", tri.size, (*YELLOW, 255))
@@ -192,7 +192,7 @@ def create_rev_killfeed(killer_name, victim_name, killer_agent, victim_agent, we
 
     # Numeral — use Rev_ variant
     if numeral:
-        numeral_img = Image.open(os.path.join(ASSETS_PATH, "ui-v2", f"Rev_Numeral_{numeral}.png")).convert("RGBA")
+        numeral_img = Image.open(os.path.join(ASSETS_PATH, "ui", f"Rev_Numeral_{numeral}.png")).convert("RGBA")
         numeral_img = unpremultiply(numeral_img)
         new_width = canvas.width + numeral_img.width
         new_height = max(canvas.height, numeral_img.height)
