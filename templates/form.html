@@ -5,14 +5,72 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KILLFEED GENERATOR</title>
-  <link rel="stylesheet" href="/static_v2/style.css?v={{ css_version }}">
+  <link rel="stylesheet" href="/static/style.css">
   <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon/favicon-16x16.png">
+  <link rel="preconnect" href="https://cdn.statically.io">
+  <link rel="dns-prefetch" href="https://cdn.statically.io">
+  {% set CDN_BASE = 'https://cdn.statically.io/gh/mr-velosofy/FastAPI_KillfeedGenerator@main/assets/' %}
+  {% set AGENT_ICON_FIX = {'KAYO': 'Kayo', 'Iso': 'ISO'} %}
+  {% for a in agents %}
+  <link rel="preload" as="image" href="{{ CDN_BASE }}agents-icon/{{ AGENT_ICON_FIX.get(a, a) }}.png">
+  {% endfor %}
+  {% for w in weapons %}
+  <link rel="preload" as="image" href="{{ CDN_BASE }}{{ w.replace('\\', '/') }}">
+  {% endfor %}
+  {% for ab in abilities %}
+  <link rel="preload" as="image" href="{{ CDN_BASE }}{{ ab.replace('\\', '/') }}">
+  {% endfor %}
+  {% for sp in special %}
+  <link rel="preload" as="image" href="{{ CDN_BASE }}{{ sp.replace('\\', '/') }}">
+  {% endfor %}
 </head>
 
 <body>
   <div class="bg-overlay"></div>
+
+  <!-- PAGE SKELETON (removed once the first preview arrives) -->
+  <div class="page-skeleton" id="page-skeleton">
+    <div class="skeleton-app">
+      <!-- preview panel -->
+      <div class="sk-preview-panel">
+        <div class="sk sk-preview-topbar"></div>
+        <div class="sk sk-preview-canvas"></div>
+        <div class="sk sk-preview-note"></div>
+      </div>
+      <!-- section header -->
+      <div class="sk-section-header">
+        <div class="sk sk-title"></div>
+        <div class="sk sk-rule"></div>
+      </div>
+      <!-- configuration panel -->
+      <div class="sk-config">
+        <div class="sk-loadout">
+          <div class="sk sk-label"></div>
+          <div class="sk sk-segmented"></div>
+        </div>
+        <div class="sk-inputs-row">
+          <div class="sk-input"><div class="sk sk-label"></div><div class="sk sk-field"></div></div>
+          <div class="sk-input"><div class="sk sk-label"></div><div class="sk sk-field"></div></div>
+          <div class="sk-input"><div class="sk sk-label"></div><div class="sk sk-field"></div></div>
+          <div class="sk-input"><div class="sk sk-label"></div><div class="sk sk-field"></div></div>
+          <div class="sk-input sk-grow2"><div class="sk sk-label"></div><div class="sk sk-field"></div></div>
+          <div class="sk-input sk-narrow"><div class="sk sk-label"></div><div class="sk sk-field"></div></div>
+        </div>
+        <div class="sk-checkbox-row">
+          <div class="sk sk-check"></div>
+          <div class="sk sk-check"></div>
+          <div class="sk sk-check"></div>
+          <div class="sk sk-check"></div>
+          <div class="sk sk-check"></div>
+        </div>
+        <div class="sk sk-export"></div>
+      </div>
+      <div class="sk-footer"><div class="sk sk-credit"></div></div>
+    </div>
+  </div>
+
   <div class="app">
 
     <!-- PREVIEW PANEL -->
@@ -26,6 +84,7 @@
           <img src="{{ image_url or '' }}" alt="Preview" id="preview-img" class="preview-img">
         </div>
       </div>
+      <div class="preview-note">Previews are of lower quality &mdash; use the export button for best output</div>
     </div>
 
     <!-- SECTION HEADER -->
@@ -135,11 +194,22 @@
   </div>
 
   <script>
+    var CDN = 'https://cdn.statically.io/gh/mr-velosofy/FastAPI_KillfeedGenerator@main/assets/';
+    var AGENT_ICON_FIX = { 'KAYO': 'Kayo', 'Iso': 'ISO' };
     var weaponsList = {{ weapons | tojson }};
     var abilitiesList = {{ abilities | tojson }};
     var specialList = {{ special | tojson }};
     var allTabs = { weapons: weaponsList, abilities: abilitiesList, special: specialList };
     var activeTab = "weapons";
+
+    function weaponImgSrc(val) {
+      return val ? CDN + encodeURI(String(val).replace(/\\/g, '/')) : '';
+    }
+
+    function agentIconSrc(val) {
+      if (!val) return '';
+      return CDN + 'agents-icon/' + encodeURI(AGENT_ICON_FIX[val] || val) + '.png';
+    }
 
     function displayName(path) {
       var name = path.split(/[/\\]/).pop();
@@ -162,14 +232,10 @@
       var getImgSrc, getText;
 
       if (isWeapon) {
-        getImgSrc = function (val) { return val ? '/assets/' + val : ''; };
+        getImgSrc = weaponImgSrc;
         getText = function (val) { return val ? displayName(val) : ''; };
       } else {
-        getImgSrc = function (val) {
-          if (!val) return '';
-          var fix = { 'KAYO': 'Kayo', 'Iso': 'ISO' };
-          return '/assets/agents-icon/' + (fix[val] || val) + '.png';
-        };
+        getImgSrc = agentIconSrc;
         getText = function (val) { return val || ''; };
       }
 
@@ -489,6 +555,8 @@
 
     var previewImg = document.getElementById("preview-img");
     var debounceTimer;
+    var lastPreviewKey = null;
+    var pendingKey = null;
 
     function collectFormData() {
       var form = document.querySelector("form");
@@ -506,10 +574,38 @@
     function triggerPreview() {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(function () {
-        var params = collectFormData();
-        var url = "/api/preview?" + params.toString();
-        previewImg.src = url + "&t=" + Date.now();
-      }, 300);
+        var key = collectFormData().toString();
+        if (key === lastPreviewKey) return; // nothing changed -> skip regeneration
+        pendingKey = key;
+        previewImg.src = "/api/preview?" + key;
+      }, 800); // longer debounce: one render per pause in typing
+    }
+
+    previewImg.addEventListener("load", function () {
+      if (pendingKey !== null) { lastPreviewKey = pendingKey; pendingKey = null; }
+      previewImg.classList.add("is-loaded");
+      dismissSkeleton();
+    });
+    previewImg.addEventListener("error", function () {
+      pendingKey = null; // allow retry on failure
+    });
+
+    // ── Skeleton loading state ───────────────────────────────────
+    // Covers the page until the first preview arrives (or ~2s max)
+    var skeleton = document.getElementById("page-skeleton");
+    function dismissSkeleton() {
+      if (!skeleton || skeleton.classList.contains("is-done")) return;
+      skeleton.classList.add("is-done");
+      setTimeout(function () {
+        if (skeleton.parentNode) skeleton.parentNode.removeChild(skeleton);
+        skeleton = null;
+      }, 450);
+    }
+    setTimeout(dismissSkeleton, 2200);
+    // Cached render (e.g. post-submit): load event already fired
+    if (previewImg.complete && previewImg.naturalWidth > 0) {
+      previewImg.classList.add("is-loaded");
+      dismissSkeleton();
     }
 
     document.querySelectorAll("input, select").forEach(function (el) {
@@ -532,7 +628,35 @@
 
     // ── Init ─────────────────────────────────────────────────────
 
+    // First-load prefill: default nicknames to the selected agents
+    (function prefillNames() {
+      var k = document.getElementById("killer_name");
+      var v = document.getElementById("victim_name");
+      if (!k.value && !v.value && !submittedWeapon) {
+        k.value = document.getElementById("killer_agent").value;
+        v.value = document.getElementById("victim_agent").value;
+      }
+    })();
+
     initAllDropdowns();
+
+    // Preload all selector artwork from the CDN so dropdowns open instantly
+    (function preloadAssets() {
+      var seen = {};
+      function add(url) {
+        if (!url || seen[url]) return;
+        seen[url] = 1;
+        var im = new Image();
+        im.src = url;
+      }
+      document.querySelectorAll('#killer_agent option').forEach(function (o) {
+        add(agentIconSrc(o.value));
+      });
+      weaponsList.concat(abilitiesList).concat(specialList).forEach(function (item) {
+        add(weaponImgSrc(item));
+      });
+    })();
+
     setTimeout(triggerPreview, 100);
 
     // ── Validation ───────────────────────────────────────────────
