@@ -4,7 +4,7 @@ from datetime import datetime
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_PATH = os.path.join(BASE_DIR, "assets")
-OUTPUT_PATH = os.path.join(BASE_DIR, "generated_killfeeds_v1")
+OUTPUT_PATH = os.path.join(BASE_DIR, "generated_killfeeds")
 FONT_PATH = os.path.join(ASSETS_PATH, "fonts", "dinnextw1g_medium.otf")
 os.makedirs(OUTPUT_PATH, exist_ok=True)
 
