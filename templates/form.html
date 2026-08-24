@@ -152,6 +152,14 @@
 
   <div class="app">
 
+    <!-- LIVE STATS -->
+    <div class="live-stats" id="live-stats" hidden>
+      <span class="ls-dot"></span>
+      <span><strong id="ls-online">–</strong> online</span>
+      <span class="ls-sep">·</span>
+      <span><strong id="ls-today">–</strong> killfeeds today</span>
+    </div>
+
     <!-- PREVIEW PANEL -->
     <div class="preview-panel" id="preview-box">
       <div class="preview-topbar">
@@ -914,6 +922,22 @@
 
     initAllDropdowns();
     handleReviveInit();
+
+    // ── Live stats badge (doubles as the presence heartbeat) ─────
+    var lsBox = document.getElementById("live-stats");
+    function refreshLiveStats() {
+      fetch("/api/stats/public", { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (s) {
+          if (!s) return;
+          document.getElementById("ls-online").textContent = s.online;
+          document.getElementById("ls-today").textContent = s.today;
+          lsBox.hidden = false;
+        })
+        .catch(function () {});
+    }
+    refreshLiveStats();
+    setInterval(refreshLiveStats, 60000);
 
     // Preload all selector artwork from the CDN so dropdowns open instantly
     (function preloadAssets() {
