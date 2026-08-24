@@ -320,6 +320,8 @@ async def api_preview(
     if numeral and numeral not in numeral_valid:
         numeral = None
 
+    cleanup_old_images(os.path.join(BASE_DIR, "generated_killfeeds"))
+
     weapon_path = os.path.join(BASE_DIR, "assets", weapon)
     if not os.path.isfile(weapon_path):
         return Response(status_code=404, content="Weapon not found")
