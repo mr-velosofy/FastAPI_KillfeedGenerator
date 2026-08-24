@@ -596,7 +596,7 @@
       });
     });
 
-    enemyKillCheck.addEventListener("change", function () {
+    document.getElementById("is_enemy_kill").addEventListener("change", function () {
       if (!isReviveMode()) return;
       var off = enemyKillCheck.checked; // enemy revive: ME can never be you
       meP1Box.classList.toggle("is-disabled", off);
