@@ -9,6 +9,7 @@ import zlib
 from generator import create_killfeed
 from rev_generator import create_rev_killfeed
 from self_kill_generator import create_self_killfeed
+from revive_generator import create_revive_killfeed
 
 
 app = FastAPI()
@@ -208,6 +209,7 @@ async def generate_and_preview(
     is_player_kill: bool = Form(False),
     is_enemy_kill: bool = Form(False),
     is_self_kill: bool = Form(False),
+    me_side: str = Form(""),
     numeral: str = Form(None)
 ):
     numeral_valid = ['3', '4', '5', '6', '7']
@@ -224,7 +226,18 @@ async def generate_and_preview(
             error = f"Weapon file not found: {os.path.basename(weapon_path)}."
 
     if not error:
-        if is_self_kill:
+        if weapon == "special/Revive.png":
+            cleanup_old_images(os.path.join(BASE_DIR, "generated_killfeeds"))
+            side = me_side if (me_side in ("left", "right") and not is_enemy_kill) else ""
+            image_path = create_revive_killfeed(
+                left_name=killer_name or "PLAYER",
+                left_agent=killer_agent + ".png",
+                right_name=victim_name or "PLAYER",
+                right_agent=victim_agent + ".png",
+                theme="red" if is_enemy_kill else "teal",
+                me_side=side
+            )
+        elif is_self_kill:
             name = killer_name or victim_name or "PLAYER"
             agent = killer_agent if killer_agent != "" else (victim_agent if victim_agent != "" else "Jett")
             cleanup_old_images(os.path.join(BASE_DIR, "generated_killfeeds"))
@@ -295,6 +308,7 @@ async def generate_and_preview(
                 "is_player_kill": is_player_kill,
                 "is_enemy_kill": is_enemy_kill,
                 "is_self_kill": is_self_kill,
+                "me_side": me_side,
             }
         },
         headers={"Cache-Control": "no-cache, no-store, must-revalidate"}
@@ -313,6 +327,7 @@ async def api_preview(
     is_player_kill: bool = Query(False),
     is_enemy_kill: bool = Query(False),
     is_self_kill: bool = Query(False),
+    me_side: str = Query(""),
     numeral: str = Query(None),
     download: bool = Query(False)
 ):
@@ -327,7 +342,14 @@ async def api_preview(
         return Response(status_code=404, content="Weapon not found")
 
     try:
-        if is_self_kill:
+        if weapon == "special/Revive.png":
+            side = me_side if (me_side in ("left", "right") and not is_enemy_kill) else ""
+            image_path = create_revive_killfeed(
+                left_name=killer_name or "PLAYER", left_agent=killer_agent + ".png",
+                right_name=victim_name or "PLAYER", right_agent=victim_agent + ".png",
+                theme="red" if is_enemy_kill else "teal", me_side=side
+            )
+        elif is_self_kill:
             name = killer_name or victim_name or "PLAYER"
             agent = killer_agent if killer_agent else (victim_agent if victim_agent else "Jett")
             image_path = create_self_killfeed(
