@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
+<head prefix="og: https://ogp.me/ns#">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Valorant Killfeed Generator</title>
   <meta name="description" content="Craft perfect VALORANT killfeeds in seconds — kills, suicides, enemy themes and revive feeds. Free browser-based generator with full quality export.">
-  <link rel="stylesheet" href="/static/style.css?v={{ css_version }}">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="https://valorant-killfeed-generator.onrender.com/">
 
   <!-- Open Graph / Facebook / LinkedIn / WhatsApp / Discord -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Valorant Killfeed Generator">
-  <meta property="og:url" content="{{ base_url }}/">
+  <meta property="og:url" content="https://valorant-killfeed-generator.onrender.com/">
   <meta property="og:title" content="Valorant Killfeed Generator">
   <meta property="og:description" content="Craft perfect VALORANT killfeeds in seconds — kills, suicides, enemy themes and revive feeds. Free browser-based generator with full quality export.">
-  <meta property="og:image" content="{{ base_url }}/static/favicon/og-image-v2.jpg">
-  <meta property="og:image:secure_url" content="{{ base_url }}/static/favicon/og-image-v2.jpg">
+  <meta property="og:image" content="https://valorant-killfeed-generator.onrender.com/static/favicon/og-image-v2.jpg">
+  <meta property="og:image:secure_url" content="https://valorant-killfeed-generator.onrender.com/static/favicon/og-image-v2.jpg">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1600">
   <meta property="og:image:height" content="900">
@@ -26,12 +27,66 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Valorant Killfeed Generator">
   <meta name="twitter:description" content="Craft perfect VALORANT killfeeds in seconds — kills, suicides, enemy themes and revive feeds. Free browser-based generator with full quality export.">
-  <meta name="twitter:image" content="{{ base_url }}/static/favicon/og-image-v2.jpg">
+  <meta name="twitter:image" content="https://valorant-killfeed-generator.onrender.com/static/favicon/og-image-v2.jpg">
   <meta name="twitter:image:alt" content="Valorant Killfeed Generator — craft perfect Valorant killfeeds">
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://valorant-killfeed-generator.onrender.com/#website",
+        "url": "https://valorant-killfeed-generator.onrender.com/",
+        "name": "Valorant Killfeed Generator",
+        "description": "Create realistic VALORANT killfeeds in your browser — kills, suicides, enemy themes and revive feeds.",
+        "inLanguage": "en",
+        "publisher": {
+          "@type": "Organization",
+          "@id": "https://valorant-killfeed-generator.onrender.com/#organization",
+          "name": "Valorant Killfeed Generator",
+          "url": "https://valorant-killfeed-generator.onrender.com/",
+          "logo": { "@type": "ImageObject", "url": "https://valorant-killfeed-generator.onrender.com/static/favicon/logo.svg" }
+        }
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://valorant-killfeed-generator.onrender.com/#webpage",
+        "url": "https://valorant-killfeed-generator.onrender.com/",
+        "name": "Valorant Killfeed Generator",
+        "description": "Create realistic VALORANT killfeeds in your browser — kills, suicides, enemy themes and revive feeds.",
+        "isPartOf": { "@id": "https://valorant-killfeed-generator.onrender.com/#website" },
+        "inLanguage": "en",
+        "primaryImageOfPage": {
+          "@type": "ImageObject",
+          "url": "https://valorant-killfeed-generator.onrender.com/static/favicon/og-image-v2.jpg"
+        }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "Valorant Killfeed Generator",
+        "url": "https://valorant-killfeed-generator.onrender.com/",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Web",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "description": "Free browser-based generator for realistic VALORANT killfeeds — headshots, wallbangs, suicides, enemy themes and revive feeds."
+      }
+    ]
+  }
+  </script>
 
   <!-- Discord / theme -->
   <meta name="theme-color" content="#ff4655">
+
+  <!-- Icons -->
   <link rel="icon" type="image/svg+xml" href="/static/favicon/logo.svg">
+  <link rel="icon" type="image/x-icon" href="/static/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="/static/favicon/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/static/favicon/android-chrome-512x512.png">
+  <link rel="manifest" href="/static/favicon/site.webmanifest">
+
+  <link rel="stylesheet" href="/static/style.css?v={{ css_version }}">
   <link rel="preconnect" href="https://cdn.statically.io">
   <link rel="dns-prefetch" href="https://cdn.statically.io">
   {% set CDN_BASE = 'https://cdn.statically.io/gh/mr-velosofy/FastAPI_KillfeedGenerator@main/assets/' %}
