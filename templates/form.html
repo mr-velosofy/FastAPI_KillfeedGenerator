@@ -130,7 +130,7 @@
             <input type="text" name="killer_name" id="killer_name" value="{{ form.killer_name }}" placeholder="PLAYER">
             <div class="field-error" id="killer_name_error"></div>
           </div>
-          <div class="input-item switch-item">
+          <div class="input-item switch-item" id="switch-group">
             <span class="label-tiny">&nbsp;</span>
             <button type="button" class="btn-swap" id="btn-swap" title="Swap P1 / P2" aria-label="Swap P1 and P2">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -530,10 +530,13 @@
     var victimAgentSelect = document.getElementById("victim_agent");
     var enemyKillCheck = document.getElementById("is_enemy_kill");
 
+    var savedP2 = null; // P2 details stashed while Suicide mode rewrites them
+
     function toggleSelfKill() {
       var isSelf = selfKillCheck.checked;
       document.getElementById("victim-group").style.display = isSelf ? "none" : "";
       document.getElementById("victim-agent-group").style.display = isSelf ? "none" : "";
+      document.getElementById("switch-group").style.display = isSelf ? "none" : "";
       document.getElementById("numeral-group").style.display = isSelf ? "none" : "";
       document.getElementById("hs-toggle").style.display = isSelf ? "none" : "";
       document.getElementById("wb-toggle").style.display = isSelf ? "none" : "";
@@ -543,8 +546,18 @@
       if (isSelf) {
         enemyKillCheck.checked = false;
         if (!killerNameInput.value) killerNameInput.value = "PLAYER";
+        if (!savedP2) {
+          savedP2 = { name: victimNameInput.value, agent: victimAgentSelect.value };
+        }
         victimNameInput.value = killerNameInput.value;
         victimAgentSelect.value = killerAgentSelect.value;
+        rebuildDropdownFor("victim_agent");
+      } else if (savedP2) {
+        victimNameInput.value = savedP2.name;
+        victimAgentSelect.value = savedP2.agent;
+        savedP2 = null;
+        rebuildDropdownFor("victim_agent");
+        triggerPreview();
       }
     }
 
