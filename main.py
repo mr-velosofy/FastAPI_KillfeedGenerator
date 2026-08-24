@@ -2,7 +2,6 @@ from fastapi import FastAPI, Form, Request, Query
 from fastapi.responses import HTMLResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from contextlib import asynccontextmanager
 import gzip
 import os
 import time
@@ -11,17 +10,9 @@ from generator import create_killfeed
 from rev_generator import create_rev_killfeed
 from self_kill_generator import create_self_killfeed
 from revive_generator import create_revive_killfeed
-import stats as stats_mod
 
 
-@asynccontextmanager
-async def lifespan(app):
-    await stats_mod.startup()
-    yield
-    await stats_mod.shutdown()
-
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -188,16 +179,9 @@ async def ping():
     return {"message": "pong"}
 
 
-@app.get("/api/stats/public")
-async def api_stats_public():
-    return stats_mod.public_stats()
-
-
 @app.get("/", response_class=HTMLResponse)
 async def form_page(request: Request):
-    vid, new_cookie = stats_mod.ensure_vid(request.cookies.get("vf_vid"))
-    stats_mod.page_hit(vid, request.headers.get("referer"))
-    response = templates.TemplateResponse(
+    return templates.TemplateResponse(
         request=request,
         name="form.html",
         context={
@@ -212,9 +196,6 @@ async def form_page(request: Request):
         },
         headers={"Cache-Control": "no-cache, no-store, must-revalidate"}
     )
-    if new_cookie:
-        response.set_cookie("vf_vid", vid, max_age=31536000, httponly=True, samesite="lax")
-    return response
 
 @app.post("/", response_class=HTMLResponse)
 async def generate_and_preview(
@@ -303,19 +284,6 @@ async def generate_and_preview(
         else:
             image_filename = os.path.basename(image_path)
             image_url = f"/generated/{image_filename}"
-            if weapon == "special/Revive.png":
-                mode, wfield = "revive", None
-            elif is_self_kill:
-                mode, wfield = "suicide", weapon
-            elif is_enemy_kill:
-                mode, wfield = "enemy", weapon
-            else:
-                mode, wfield = "normal", weapon
-            stats_mod.log_event(
-                "export",
-                vid=request.cookies.get("vf_vid") or "",
-                killer_agent=killer_agent, victim_agent=victim_agent,
-                weapon=wfield, mode=mode)
 
     return templates.TemplateResponse(
         request=request,
@@ -408,20 +376,6 @@ async def api_preview(
 
         if not image_path or not os.path.isfile(image_path):
             return Response(status_code=500, content="Generation failed")
-
-        if weapon == "special/Revive.png":
-            mode, wfield = "revive", None
-        elif is_self_kill:
-            mode, wfield = "suicide", weapon
-        elif is_enemy_kill:
-            mode, wfield = "enemy", weapon
-        else:
-            mode, wfield = "normal", weapon
-        stats_mod.log_event(
-            "export" if download else "preview",
-            vid=request.query_params.get("vf_vid") or request.cookies.get("vf_vid") or "",
-            killer_agent=killer_agent, victim_agent=victim_agent,
-            weapon=wfield, mode=mode)
 
         with open(image_path, "rb") as f:
             data = f.read()

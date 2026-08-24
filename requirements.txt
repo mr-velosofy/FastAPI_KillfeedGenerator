@@ -3,5 +3,3 @@ fastapi
 jinja2
 python-multipart
 pillow
-psycopg[binary]
-python-dotenv
