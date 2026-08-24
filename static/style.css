@@ -179,11 +179,6 @@ body {
 
 .sk-switch {
   flex: 0 0 56px;
-  align-self: flex-end;
-}
-
-.sk-switch .sk {
-  height: 56px;
 }
 
 .sk-input .sk-field {
@@ -444,10 +439,9 @@ form {
 
 /* PLAYER SWITCH */
 
-.switch-wrap {
+.switch-item {
   flex: 0 0 auto;
-  display: flex;
-  align-items: flex-end;
+  min-width: 0;
 }
 
 .btn-swap {
@@ -1027,8 +1021,8 @@ form {
     width: 100%;
   }
 
-  .switch-wrap {
-    align-items: stretch;
+  .switch-item .label-tiny {
+    display: none;
   }
 
   .btn-swap {
