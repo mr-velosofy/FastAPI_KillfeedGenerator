@@ -21,6 +21,8 @@ KILLER_BG_COLOR = (87, 222, 196)
 TEAL_HIGHLIGHT = (87, 222, 196)
 SUICIDE_BG_COLOR = (178, 237, 219)
 SUICIDE_HIGHLIGHT = (178, 237, 219)
+ENEMY_BG_COLOR = (240, 91, 88)
+ENEMY_SUICIDE_COLOR = (253, 147, 149)
 TEXT_COLOR = (255, 255, 255, 255)
 YELLOW = (231, 237, 131)
 BORDER_W = 6
@@ -66,7 +68,14 @@ def create_custom_me_mask(mx):
 
 
 def create_self_killfeed(name, agent, weapon,
-                         is_headshot=False, is_player_kill=False, is_wallbang=False, numeral=None):
+                         is_headshot=False, is_player_kill=False, is_wallbang=False,
+                         numeral=None, is_enemy_kill=False):
+    font = ImageFont.truetype(FONT_PATH, FONT_SIZE)
+
+    killer_bg = ENEMY_BG_COLOR if is_enemy_kill else KILLER_BG_COLOR
+    suicide_bg = ENEMY_SUICIDE_COLOR if is_enemy_kill else SUICIDE_BG_COLOR
+    killer_hl = ENEMY_BG_COLOR if is_enemy_kill else TEAL_HIGHLIGHT
+    suicide_hl = ENEMY_SUICIDE_COLOR if is_enemy_kill else SUICIDE_HIGHLIGHT
     font = ImageFont.truetype(FONT_PATH, FONT_SIZE)
 
     agent_img = unpremultiply(Image.open(os.path.join(ASSETS_PATH, "agents", agent)).resize(AGENT_ICON_SIZE))
@@ -109,7 +118,7 @@ def create_self_killfeed(name, agent, weapon,
     teal = Image.new("RGBA", (tw, IMG_HEIGHT), (0, 0, 0, 0))
     for x in range(mx + 1):
         a = int(255 * (x / mx))
-        ImageDraw.Draw(teal).line([(x, 0), (x, IMG_HEIGHT)], fill=(*KILLER_BG_COLOR, a))
+        ImageDraw.Draw(teal).line([(x, 0), (x, IMG_HEIGHT)], fill=(*killer_bg, a))
     m = Image.new("L", (tw, IMG_HEIGHT), 0)
     ImageDraw.Draw(m).polygon(k_shape, fill=255)
     canvas.paste(teal, (0, 0), m)
@@ -121,7 +130,7 @@ def create_self_killfeed(name, agent, weapon,
     for x in range(rl, tw):
         d = abs(x - mx)
         a = max(0, int(255 * (1 - d / md)))
-        ImageDraw.Draw(bg).line([(x, 0), (x, IMG_HEIGHT)], fill=(*SUICIDE_BG_COLOR, a))
+        ImageDraw.Draw(bg).line([(x, 0), (x, IMG_HEIGHT)], fill=(*suicide_bg, a))
     m = Image.new("L", (tw, IMG_HEIGHT), 0)
     ImageDraw.Draw(m).polygon(v_shape, fill=255)
     canvas.paste(bg, (0, 0), m)
@@ -130,17 +139,17 @@ def create_self_killfeed(name, agent, weapon,
         canvas.paste(Image.new("RGBA", (120, 130), (*YELLOW, 255)), (0, 0))
         canvas.paste(Image.new("RGBA", (120, 130), (*YELLOW, 255)), (tw - 120, 0))
     else:
-        canvas.paste(Image.new("RGBA", (120, 130), (*TEAL_HIGHLIGHT, 255)), (0, 0))
-        canvas.paste(Image.new("RGBA", (120, 130), (*SUICIDE_HIGHLIGHT, 255)), (tw - 120, 0))
+        canvas.paste(Image.new("RGBA", (120, 130), (*killer_hl, 255)), (0, 0))
+        canvas.paste(Image.new("RGBA", (120, 130), (*suicide_hl, 255)), (tw - 120, 0))
 
     # Agent icons
-    hl_color = YELLOW if is_player_kill else TEAL_HIGHLIGHT
+    hl_color = YELLOW if is_player_kill else killer_hl
     hl = Image.new("RGBA", agent_img.size, (*hl_color, 255))
     canvas.paste(hl, (10, 0), agent_img)
     canvas.paste(agent_img, (0, 0), agent_img)
 
     victim_flipped = ImageOps.mirror(agent_img)
-    victim_hl_color = YELLOW if is_player_kill else SUICIDE_HIGHLIGHT
+    victim_hl_color = YELLOW if is_player_kill else suicide_hl
     victim_hl = Image.new("RGBA", victim_flipped.size, (*victim_hl_color, 255))
     canvas.paste(victim_hl, (tw - AGENT_ICON_SIZE[0] - 10, 0), victim_flipped)
     canvas.paste(victim_flipped, (tw - AGENT_ICON_SIZE[0], 0), victim_flipped)

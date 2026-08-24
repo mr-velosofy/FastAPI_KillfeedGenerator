@@ -235,7 +235,8 @@ async def generate_and_preview(
                 is_headshot=is_headshot,
                 is_wallbang=is_wallbang,
                 is_player_kill=is_player_kill,
-                numeral=numeral
+                numeral=numeral,
+                is_enemy_kill=is_enemy_kill
             )
         elif is_enemy_kill:
             cleanup_old_images(os.path.join(BASE_DIR, "generated_killfeeds"))
@@ -330,7 +331,8 @@ async def api_preview(
             image_path = create_self_killfeed(
                 name=name, agent=agent + ".png", weapon=weapon,
                 is_headshot=False, is_wallbang=False,
-                is_player_kill=is_player_kill, numeral=None
+                is_player_kill=is_player_kill, numeral=None,
+                is_enemy_kill=is_enemy_kill
             )
         elif is_enemy_kill:
             image_path = create_rev_killfeed(

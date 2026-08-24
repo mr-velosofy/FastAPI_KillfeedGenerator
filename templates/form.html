@@ -540,11 +540,9 @@
       document.getElementById("numeral-group").style.display = isSelf ? "none" : "";
       document.getElementById("hs-toggle").style.display = isSelf ? "none" : "";
       document.getElementById("wb-toggle").style.display = isSelf ? "none" : "";
-      enemyKillCheck.closest(".checkbox-box").style.display = isSelf ? "none" : "";
       document.getElementById("killer-name-label").textContent = isSelf ? "NAME" : "NICK(P1)";
       document.getElementById("killer-agent-label").textContent = isSelf ? "AGENT" : "AGENT(P1)";
       if (isSelf) {
-        enemyKillCheck.checked = false;
         if (!killerNameInput.value) killerNameInput.value = "PLAYER";
         if (!savedP2) {
           savedP2 = { name: victimNameInput.value, agent: victimAgentSelect.value };
@@ -567,9 +565,6 @@
     });
     killerAgentSelect.addEventListener("change", function () {
       if (selfKillCheck.checked) victimAgentSelect.value = this.value;
-    });
-    enemyKillCheck.addEventListener("change", function () {
-      if (this.checked) selfKillCheck.checked = false;
     });
 
     toggleSelfKill();
