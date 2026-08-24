@@ -760,6 +760,11 @@ form {
   background: #100A0A;
 }
 
+.checkbox-box.is-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
 .checkbox-box input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;

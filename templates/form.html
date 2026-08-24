@@ -140,7 +140,7 @@
             </button>
           </div>
           <div class="input-item cdrop-wrap" id="victim-agent-group">
-            <span class="label-tiny">AGENT(P2)</span>
+            <span class="label-tiny" id="victim-agent-label">AGENT(P2)</span>
             <div class="cdrop" data-for="victim_agent"></div>
             <select name="victim_agent" id="victim_agent" style="display:none">
               {% for agent in agents %}
@@ -149,7 +149,7 @@
             </select>
           </div>
           <div class="input-item" id="victim-group">
-            <span class="label-tiny">NICK(P2)</span>
+            <span class="label-tiny" id="victim-name-label">NICK(P2)</span>
             <input type="text" name="victim_name" id="victim_name" value="{{ form.victim_name }}" placeholder="PLAYER">
             <div class="field-error" id="victim_name_error"></div>
           </div>
@@ -187,10 +187,19 @@
             <input type="checkbox" name="is_enemy_kill" id="is_enemy_kill" {% if form.is_enemy_kill %}checked{% endif %}>
             <span class="checkbox-label">ENEMY KILL</span>
           </label>
-          <label class="checkbox-box">
+          <label class="checkbox-box" id="me-highlight-toggle">
             <input type="checkbox" name="is_player_kill" {% if form.is_player_kill %}checked{% endif %}>
             <span class="checkbox-label">ME HIGHLIGHT</span>
           </label>
+          <label class="checkbox-box" id="me-p1-toggle" style="display:none">
+            <input type="checkbox" id="me_left_check">
+            <span class="checkbox-label">ME(P1)</span>
+          </label>
+          <label class="checkbox-box" id="me-p2-toggle" style="display:none">
+            <input type="checkbox" id="me_right_check">
+            <span class="checkbox-label">ME(P2)</span>
+          </label>
+          <input type="hidden" name="me_side" id="me-side-input" value="{{ form.get('me_side', '') }}">
         </div>
 
         <!-- EXPORT -->
@@ -439,6 +448,7 @@
         btn.classList.add("active");
         activeTab = btn.getAttribute("data-tab");
         populateSelect(activeTab);
+        refreshFormMode();
         rebuildWeaponOptionsOnTab();
         setTimeout(triggerPreview, 50);
       });
@@ -521,6 +531,108 @@
 
     initStepper();
 
+    // ── Revive mode ──────────────────────────────────────────────
+
+    var REVIVE_VALUE = "special/Revive.png";
+    var meSideInput = document.getElementById("me-side-input");
+    var meLeftCheck = document.getElementById("me_left_check");
+    var meRightCheck = document.getElementById("me_right_check");
+    var meP1Box = document.getElementById("me-p1-toggle");
+    var meP2Box = document.getElementById("me-p2-toggle");
+    var meHighlightBox = document.getElementById("me-highlight-toggle");
+    var lastNonReviveWeapon = (function () { // eager: toggleSelfKill() may fire before handleReviveInit
+      var cur = document.getElementById("weapon-select").value;
+      return (cur && cur !== REVIVE_VALUE) ? cur : weaponsList[0];
+    })();
+
+    function isReviveMode() {
+      return document.getElementById("weapon-select").value === REVIVE_VALUE;
+    }
+
+    function setWeapon(val) {
+      activeTab = detectTab(val);
+      tabButtons.forEach(function (b) {
+        b.classList.toggle("active", b.getAttribute("data-tab") === activeTab);
+      });
+      populateSelect(activeTab);
+      document.getElementById("weapon-select").value = val;
+      rebuildWeaponOptionsOnTab();
+    }
+
+    function syncMeSideInput() {
+      var side = "";
+      if (isReviveMode() && !enemyKillCheck.checked) {
+        if (meLeftCheck.checked) side = "left";
+        else if (meRightCheck.checked) side = "right";
+      }
+      meSideInput.value = side;
+    }
+
+    function refreshFormMode() {
+      var rev = isReviveMode();
+      var isSelf = selfKillCheck.checked;
+      meHighlightBox.style.display = rev ? "none" : "";
+      meP1Box.style.display = rev ? "" : "none";
+      meP2Box.style.display = rev ? "" : "none";
+      document.getElementById("hs-toggle").style.display = (rev || isSelf) ? "none" : "";
+      document.getElementById("wb-toggle").style.display = (rev || isSelf) ? "none" : "";
+      document.getElementById("numeral-group").style.display = (rev || isSelf) ? "none" : "";
+      document.getElementById("victim-group").style.display = isSelf ? "none" : "";
+      document.getElementById("victim-agent-group").style.display = isSelf ? "none" : "";
+      document.getElementById("switch-group").style.display = isSelf ? "none" : "";
+      document.getElementById("killer-name-label").textContent = rev ? "REVIVER" : (isSelf ? "NAME" : "NICK(P1)");
+      document.getElementById("killer-agent-label").textContent = rev ? "AGENT" : (isSelf ? "AGENT" : "AGENT(P1)");
+      document.getElementById("victim-name-label").textContent = rev ? "REVIVED" : "NICK(P2)";
+      document.getElementById("victim-agent-label").textContent = "AGENT";
+      syncMeSideInput();
+    }
+
+    [meLeftCheck, meRightCheck].forEach(function (chk) {
+      chk.addEventListener("change", function () {
+        if (chk.checked) {
+          (chk === meLeftCheck ? meRightCheck : meLeftCheck).checked = false;
+        }
+        syncMeSideInput();
+      });
+    });
+
+    enemyKillCheck.addEventListener("change", function () {
+      if (!isReviveMode()) return;
+      var off = enemyKillCheck.checked; // enemy revive: ME can never be you
+      meP1Box.classList.toggle("is-disabled", off);
+      meP2Box.classList.toggle("is-disabled", off);
+      if (off) {
+        meLeftCheck.checked = false;
+        meRightCheck.checked = false;
+      }
+      syncMeSideInput();
+    });
+
+    document.getElementById("weapon-select").addEventListener("change", function () {
+      if (this.value === REVIVE_VALUE) {
+        if (selfKillCheck.checked) {
+          selfKillCheck.checked = false;
+          toggleSelfKill(); // revive and suicide are exclusive
+        }
+      } else {
+        lastNonReviveWeapon = this.value;
+      }
+      refreshFormMode();
+    });
+
+    function handleReviveInit() {
+      var cur = document.getElementById("weapon-select").value;
+      lastNonReviveWeapon = (cur && cur !== REVIVE_VALUE) ? cur : weaponsList[0];
+      var side = meSideInput.value; // restore submitted ME side
+      if (side === "left") meLeftCheck.checked = true;
+      else if (side === "right") meRightCheck.checked = true;
+      if (isReviveMode() && enemyKillCheck.checked) {
+        meP1Box.classList.add("is-disabled");
+        meP2Box.classList.add("is-disabled");
+      }
+      refreshFormMode();
+    }
+
     // ── Self-kill toggle ─────────────────────────────────────────
 
     var selfKillCheck = document.getElementById("is_self_kill");
@@ -533,15 +645,10 @@
     var savedP2 = null; // P2 details stashed while Suicide mode rewrites them
 
     function toggleSelfKill() {
+      if (selfKillCheck.checked && isReviveMode()) {
+        setWeapon(lastNonReviveWeapon); // SUICIDE wins -> leave revive mode
+      }
       var isSelf = selfKillCheck.checked;
-      document.getElementById("victim-group").style.display = isSelf ? "none" : "";
-      document.getElementById("victim-agent-group").style.display = isSelf ? "none" : "";
-      document.getElementById("switch-group").style.display = isSelf ? "none" : "";
-      document.getElementById("numeral-group").style.display = isSelf ? "none" : "";
-      document.getElementById("hs-toggle").style.display = isSelf ? "none" : "";
-      document.getElementById("wb-toggle").style.display = isSelf ? "none" : "";
-      document.getElementById("killer-name-label").textContent = isSelf ? "NAME" : "NICK(P1)";
-      document.getElementById("killer-agent-label").textContent = isSelf ? "AGENT" : "AGENT(P1)";
       if (isSelf) {
         if (!killerNameInput.value) killerNameInput.value = "PLAYER";
         if (!savedP2) {
@@ -557,6 +664,7 @@
         rebuildDropdownFor("victim_agent");
         triggerPreview();
       }
+      refreshFormMode();
     }
 
     selfKillCheck.addEventListener("change", toggleSelfKill);
@@ -588,6 +696,11 @@
       killerAgentSelect.value = victimAgentSelect.value;
       victimNameInput.value = kn;
       victimAgentSelect.value = ka;
+      if (isReviveMode() && !enemyKillCheck.checked) { // "you" stays you across the swap
+        if (meLeftCheck.checked) { meLeftCheck.checked = false; meRightCheck.checked = true; }
+        else if (meRightCheck.checked) { meRightCheck.checked = false; meLeftCheck.checked = true; }
+        syncMeSideInput();
+      }
       rebuildDropdownFor("killer_agent");
       rebuildDropdownFor("victim_agent");
       triggerPreview();
@@ -684,6 +797,7 @@
     })();
 
     initAllDropdowns();
+    handleReviveInit();
 
     // Preload all selector artwork from the CDN so dropdowns open instantly
     (function preloadAssets() {
@@ -710,14 +824,15 @@
       var valid = true;
       document.querySelectorAll(".field-error").forEach(function (el) { el.innerText = ""; });
       if (!selfKillCheck.checked) {
+        var rev = isReviveMode();
         var k = killerNameInput.value.trim();
         var v = victimNameInput.value.trim();
         if (!k) {
-          document.getElementById("killer_name_error").innerText = "ENTER A KILLER NAME";
+          document.getElementById("killer_name_error").innerText = rev ? "ENTER A REVIVER NAME" : "ENTER A KILLER NAME";
           valid = false;
         }
         if (!v) {
-          document.getElementById("victim_name_error").innerText = "ENTER A VICTIM NAME";
+          document.getElementById("victim_name_error").innerText = rev ? "ENTER A REVIVED NAME" : "ENTER A VICTIM NAME";
           valid = false;
         }
       }
