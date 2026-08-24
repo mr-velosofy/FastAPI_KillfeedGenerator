@@ -178,12 +178,22 @@ def _encode_tiny_preview(png_bytes: bytes):
 async def ping():
     return {"message": "pong"}
 
+
+def get_base_url(request: Request) -> str:
+    """Absolute origin for og: tags — works on any deployment domain,
+    respecting reverse-proxy headers (Render / antideploy)."""
+    proto = request.headers.get("x-forwarded-proto", request.url.scheme)
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host", "")
+    return f"{proto}://{host}"
+
+
 @app.get("/", response_class=HTMLResponse)
 async def form_page(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="form.html",
         context={
+            "base_url": get_base_url(request),
             "form": {},
             "agents": AGENTS,
             "weapons": WEAPONS,
@@ -288,6 +298,7 @@ async def generate_and_preview(
         request=request,
         name="form.html",
         context={
+            "base_url": get_base_url(request),
             "agents": AGENTS,
             "weapons": WEAPONS,
             "abilities": ABILITIES,
