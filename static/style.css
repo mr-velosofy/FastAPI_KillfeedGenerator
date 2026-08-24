@@ -468,6 +468,35 @@ form {
   transform: scale(0.92);
 }
 
+@keyframes swap-arrow-top {
+  0%   { transform: translateX(0);    opacity: 1; }
+  40%  { transform: translateX(9px);  opacity: 0; }
+  50%  { transform: translateX(-9px); opacity: 0; }
+  100% { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes swap-arrow-bot {
+  0%   { transform: translateX(0);    opacity: 1; }
+  40%  { transform: translateX(-9px); opacity: 0; }
+  50%  { transform: translateX(9px);  opacity: 0; }
+  100% { transform: translateX(0);    opacity: 1; }
+}
+
+.btn-swap.is-swapping .swap-arrow-top {
+  animation: swap-arrow-top 0.55s cubic-bezier(.4, 0, .2, 1);
+}
+
+.btn-swap.is-swapping .swap-arrow-bot {
+  animation: swap-arrow-bot 0.55s cubic-bezier(.4, 0, .2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-swap.is-swapping .swap-arrow-top,
+  .btn-swap.is-swapping .swap-arrow-bot {
+    animation: none;
+  }
+}
+
 .input-item input,
 .input-item select {
   background: #0E0909;
@@ -1025,9 +1054,14 @@ form {
     display: none;
   }
 
+  .switch-item {
+    align-self: center;
+    width: auto;
+  }
+
   .btn-swap {
-    width: 100%;
-    height: 44px;
+    width: 48px;
+    height: 48px;
   }
 
   .input-item input,

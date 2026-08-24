@@ -53,7 +53,7 @@
         <div class="sk-inputs-row">
           <div class="sk-input"><div class="sk sk-label"></div><div class="sk sk-field"></div></div>
           <div class="sk-input"><div class="sk sk-label"></div><div class="sk sk-field"></div></div>
-          <div class="sk-switch"><div class="sk"></div></div>
+          <div class="sk-input sk-switch"><div class="sk sk-label"></div><div class="sk sk-field"></div></div>
           <div class="sk-input"><div class="sk sk-label"></div><div class="sk sk-field"></div></div>
           <div class="sk-input"><div class="sk sk-label"></div><div class="sk sk-field"></div></div>
           <div class="sk-input sk-grow2"><div class="sk sk-label"></div><div class="sk sk-field"></div></div>
@@ -134,8 +134,8 @@
             <span class="label-tiny">&nbsp;</span>
             <button type="button" class="btn-swap" id="btn-swap" title="Swap P1 / P2" aria-label="Swap P1 and P2">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M16 3l4 4-4 4M20 7H7"/>
-                <path d="M8 21l-4-4 4-4M4 17h13"/>
+                <path class="swap-arrow-top" d="M16 3l4 4-4 4M20 7H7"/>
+                <path class="swap-arrow-bot" d="M8 21l-4-4 4-4M4 17h13"/>
               </svg>
             </button>
           </div>
@@ -581,7 +581,11 @@
       if (dd && dd._rebuild) dd._rebuild();
     }
 
-    document.getElementById("btn-swap").addEventListener("click", function () {
+    var swapBtn = document.getElementById("btn-swap");
+    swapBtn.addEventListener("animationend", function () {
+      this.classList.remove("is-swapping");
+    });
+    swapBtn.addEventListener("click", function () {
       if (selfKillCheck.checked) return; // both sides are the same player
       var kn = killerNameInput.value;
       var ka = killerAgentSelect.value;
@@ -592,6 +596,9 @@
       rebuildDropdownFor("killer_agent");
       rebuildDropdownFor("victim_agent");
       triggerPreview();
+      this.classList.remove("is-swapping");
+      void this.offsetWidth; // restart animation on rapid clicks
+      this.classList.add("is-swapping");
     });
 
     // ── Live preview ─────────────────────────────────────────────
