@@ -15,11 +15,9 @@ import asyncio
 import json
 import logging
 import os
-import re
 import threading
 import time
 import urllib.parse
-import urllib.request
 import uuid
 from datetime import datetime, timezone
 
@@ -39,10 +37,11 @@ DIGEST_SECONDS = float(os.environ.get("STATS_DIGEST_HOURS", "2")) * 3600
 
 ONLINE_WINDOW = 180.0
 PREVIEW_THROTTLE = 10.0
+EVENT_FLUSH_INTERVAL = 30.0
+PREVIEW_WEIGHT = 0.2  # 5 previews = 1 generation
 
-# ── auto-repair DATABASE_URL (encode unencoded @ / : in password) ──────────
+# ── auto-repair DATABASE_URL ────────────────────────────────────────────────
 def _repair_db_url(url):
-    """Fix Supabase URIs where the password contains bare @ or : chars."""
     if "://" not in url or "@" not in url:
         return url
     scheme, rest = url.split("://", 1)
@@ -50,7 +49,6 @@ def _repair_db_url(url):
     if ":" not in userinfo:
         return url
     user, pwd = userinfo.split(":", 1)
-    # only rebuild if encoding actually changes something
     encoded = f"{scheme}://{urllib.parse.quote(user, safe='')}:{urllib.parse.quote(pwd, safe='')}@{hostpart}"
     if encoded != url:
         log.info("stats: repaired DATABASE_URL (encoded credentials)")
@@ -70,6 +68,12 @@ _last_preview = {}
 _stats_task = None
 _last_digest_at = None
 _public_cache = {"at": 0.0, "data": {"online": 0, "today": 0}}
+
+# ── event buffer (batched writes) ───────────────────────────────────────────
+_event_buf = []
+_event_buf_lock = threading.Lock()
+_seen_today = set()
+_seen_today_date = None  # resets when UTC date changes
 
 
 def ensure_vid(raw):
@@ -159,6 +163,7 @@ def ensure_schema():
         log.warning("stats: schema init failed: %s", e)
 
 
+# ── visit tracking (deduped per day) ────────────────────────────────────────
 def _track_visit(vid, ref_host):
     try:
         with _connect() as c:
@@ -185,27 +190,44 @@ def _track_visit(vid, ref_host):
 
 def page_hit(vid, referer=None):
     heartbeat(vid)
-    if enabled:
-        host = None
-        if referer:
-            try:
-                from urllib.parse import urlparse
-                host = urlparse(referer).netloc or None
-            except Exception:
-                pass
-        _run_bg(_track_visit, vid, host)
+    if not enabled:
+        return
+    global _seen_today_date
+    today = datetime.now(timezone.utc).date()
+    with _presence_lock:
+        if _seen_today_date != today:
+            _seen_today.clear()
+            _seen_today_date = today
+        if vid in _seen_today:
+            return
+        _seen_today.add(vid)
+    host = None
+    if referer:
+        try:
+            from urllib.parse import urlparse
+            host = urlparse(referer).netloc or None
+        except Exception:
+            pass
+    _run_bg(_track_visit, vid, host)
 
 
-def _log_event(kind, vid, fields):
+# ── event batching ──────────────────────────────────────────────────────────
+def _flush_events():
+    with _event_buf_lock:
+        if not _event_buf:
+            return
+        batch = list(_event_buf)
+        _event_buf.clear()
     try:
         with _connect() as c:
-            c.execute(
-                "INSERT INTO events(kind, vid, killer_agent, victim_agent, weapon, mode) "
-                "VALUES (%s, %s, %s, %s, %s, %s)",
-                (kind, vid, fields.get("killer_agent"), fields.get("victim_agent"),
-                 fields.get("weapon"), fields.get("mode")))
+            with c.cursor() as cur:
+                cur.executemany(
+                    "INSERT INTO events(kind, vid, killer_agent, victim_agent, weapon, mode) "
+                    "VALUES (%(kind)s, %(vid)s, %(killer_agent)s, %(victim_agent)s, %(weapon)s, %(mode)s)",
+                    batch)
+        log.debug("stats: flushed %d events", len(batch))
     except Exception as e:
-        log.debug("stats: log_event failed: %s", e)
+        log.debug("stats: flush_events failed: %s", e)
 
 
 def log_event(kind, vid="", **fields):
@@ -218,7 +240,13 @@ def log_event(kind, vid="", **fields):
             if now - last < PREVIEW_THROTTLE:
                 return
             _last_preview[vid] = now
-    _run_bg(_log_event, kind, vid or "", fields)
+    rec = {"kind": kind, "vid": vid or "",
+           "killer_agent": fields.get("killer_agent"),
+           "victim_agent": fields.get("victim_agent"),
+           "weapon": fields.get("weapon"),
+           "mode": fields.get("mode")}
+    with _event_buf_lock:
+        _event_buf.append(rec)
 
 
 # ── public stats for the frontend badge ─────────────────────────────────────
@@ -227,17 +255,20 @@ def public_stats():
     cached = _public_cache["data"]
     if not enabled:
         return {"online": online, "today": cached.get("today", 0)}
-    if time.time() - _public_cache["at"] < 30:
+    if time.time() - _public_cache["at"] < 60:
         merged = dict(cached)
         merged["online"] = online
         return merged
     try:
         with _connect() as c:
-            row = c.execute(
-                "SELECT count(*) AS n FROM events "
-                "WHERE ts >= date_trunc('day', now())"
-            ).fetchone()
-        data = {"online": online, "today": int(row["n"])}
+            row = c.execute("""
+                SELECT
+                    coalesce(sum(CASE WHEN kind='export' THEN 1 ELSE 0 END), 0)
+                    + coalesce(sum(CASE WHEN kind='preview' THEN 1 ELSE 0 END), 0) * %s
+                    AS n
+                FROM events WHERE ts >= date_trunc('day', now())
+            """, (PREVIEW_WEIGHT,)).fetchone()
+        data = {"online": online, "today": round(float(row["n"]))}
         _public_cache.update(at=time.time(), data=data)
         return data
     except Exception as e:
@@ -257,21 +288,28 @@ def _window_count(c, table, where):
     return _scalar(c, f"SELECT count(*) AS n FROM {table} WHERE {where}")
 
 
+def _weighted_count(c, where):
+    row = c.execute(f"""
+        SELECT coalesce(sum(CASE WHEN kind='export' THEN 1 ELSE 0 END), 0)
+             + coalesce(sum(CASE WHEN kind='preview' THEN 1 ELSE 0 END), 0) * %s
+             AS n FROM events WHERE {where}
+    """, (PREVIEW_WEIGHT,)).fetchone()
+    return round(float(row["n"])) if row else 0
+
+
 def collect_digest(since):
     with _connect() as c:
-        gens_since = _scalar(c,
-            "SELECT count(*) AS n FROM events WHERE ts > %s", since)
-
-        split_rows = c.execute(
+        gens_since_raw = c.execute(
             "SELECT kind, count(*) AS n FROM events "
             "WHERE ts > %s GROUP BY kind", (since,)).fetchall()
-        by_kind = {r["kind"]: int(r["n"]) for r in split_rows}
+        by_kind = {r["kind"]: int(r["n"]) for r in gens_since_raw}
+        gens_since_w = round(by_kind.get("export", 0) + by_kind.get("preview", 0) * PREVIEW_WEIGHT)
 
         gens = {
-            "day":   _window_count(c, "events", "ts >= date_trunc('day', now())"),
-            "week":  _window_count(c, "events", "ts >= now() - interval '7 days'"),
-            "month": _window_count(c, "events", "ts >= date_trunc('month', now())"),
-            "all":   _window_count(c, "events", "TRUE"),
+            "day":   _weighted_count(c, "ts >= date_trunc('day', now())"),
+            "week":  _weighted_count(c, "ts >= now() - interval '7 days'"),
+            "month": _weighted_count(c, "ts >= date_trunc('month', now())"),
+            "all":   _weighted_count(c, "TRUE"),
         }
         uniq = {
             "day":   _scalar(c, "SELECT count(DISTINCT vid) AS n FROM daily_visits WHERE day = CURRENT_DATE"),
@@ -309,7 +347,7 @@ def collect_digest(since):
     mode_total = sum(modes_map.values()) or 1
 
     return {
-        "gens_since": gens_since,
+        "gens_since": gens_since_w,
         "since_split": {"previews": by_kind.get("preview", 0), "exports": by_kind.get("export", 0)},
         "gens": gens,
         "uniq": uniq,
@@ -419,12 +457,20 @@ def post_digest():
     log.info("stats: digest posted")
 
 
+# ── background loops ────────────────────────────────────────────────────────
+async def _event_flush_loop():
+    while True:
+        await asyncio.sleep(EVENT_FLUSH_INTERVAL)
+        await asyncio.to_thread(_flush_events)
+
+
 async def digest_loop():
     global _last_digest_at
     _last_digest_at = datetime.now(timezone.utc)
     while True:
         await asyncio.sleep(DIGEST_SECONDS)
         try:
+            await asyncio.to_thread(_flush_events)
             await asyncio.to_thread(post_digest)
         except Exception as e:
             log.warning("stats: digest failed: %s", e)
@@ -435,6 +481,7 @@ async def startup():
         log.info("stats: disabled (no DATABASE_URL)")
         return
     await asyncio.to_thread(ensure_schema)
+    asyncio.create_task(_event_flush_loop())
     if POST_WEBHOOK and WEBHOOK_URL:
         global _stats_task
         _stats_task = asyncio.create_task(digest_loop())
@@ -446,3 +493,4 @@ async def startup():
 async def shutdown():
     if _stats_task:
         _stats_task.cancel()
+    await asyncio.to_thread(_flush_events)
