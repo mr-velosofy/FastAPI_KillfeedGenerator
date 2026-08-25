@@ -839,24 +839,6 @@ form {
 
 /* FOOTER */
 
-.footer-bar {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.download-link {
-  font-size: 0.8rem;
-  letter-spacing: 0.2em;
-  color: #6D6D6D;
-  text-transform: uppercase;
-  text-decoration: none;
-  transition: color 0.15s;
-}
-
-.download-link:hover {
-  color: #A0A0A0;
-}
-
 .footer-credit {
   text-align: center;
   font-size: 0.65rem;
@@ -1137,14 +1119,6 @@ form {
   }
 
   .field-error {
-    font-size: 0.6rem;
-  }
-
-  .footer-bar {
-    margin-top: 12px;
-  }
-
-  .download-link {
     font-size: 0.6rem;
   }
 

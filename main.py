@@ -7,6 +7,13 @@ import gzip
 import os
 import time
 import zlib
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
+except ImportError:
+    pass
+
 from generator import create_killfeed
 from rev_generator import create_rev_killfeed
 from self_kill_generator import create_self_killfeed
@@ -42,8 +49,6 @@ app.mount("/generated", StaticFiles(directory=os.path.join(BASE_DIR, "generated_
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 
-# Startup-cached file versions for cache-busting URLs (changes only when the
-# file actually changes — unlike the old per-render timestamp busting)
 _version_cache = {}
 
 
@@ -66,9 +71,6 @@ WEAPONS = sorted(["weapons/" + f for f in os.listdir(WEAPONS_DIR) if f.endswith(
 ABILITIES = sorted(["abilities/" + f for f in os.listdir(ABILITIES_DIR) if f.endswith(".png")])
 SPECIAL = sorted(["special/" + f for f in os.listdir(SPECIAL_DIR) if f.endswith(".png")])
 
-
-# ── Text compression (HTML/CSS/JS/JSON) ──────────────────────────
-# Images pass through untouched: they are already optimized formats.
 
 TEXT_TYPES = {
     "text/html", "text/css", "text/plain",
@@ -156,9 +158,8 @@ def cleanup_old_images(folder: str, age_seconds: int = 180):
                     pass
 
 
-# Preview compression targets (preview only; downloads stay full-res PNG)
-PREVIEW_MAX_W = 800          # preview panel never displays more than this
-PREVIEW_TARGET_BYTES = 5120  # ~5 KB budget per preview response
+PREVIEW_MAX_W = 800
+PREVIEW_TARGET_BYTES = 5120
 AVIF_QUALITY_LADDER = (55, 45, 38, 32, 26)
 
 
@@ -430,8 +431,6 @@ async def api_preview(
             headers["Content-Disposition"] = 'attachment; filename="killfeed.png"'
             return Response(content=data, media_type="image/png", headers=headers)
 
-        # Preview path: serve the smallest format the client accepts
-        # (measured on real renders: png ~88 KB, webp-q84 ~28 KB, tiny avif ~4-5 KB)
         accept = request.headers.get("accept", "")
         try:
             if "image/avif" in accept:

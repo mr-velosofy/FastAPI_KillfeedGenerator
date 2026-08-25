@@ -209,6 +209,5 @@ def create_killfeed(killer_name, victim_name, killer_agent, victim_agent, weapon
     tag_part = f"_{tags}" if tags else ""
     output_filename = f"{killer_name}_vs_{victim_name}{tag_part}_{int(datetime.now().timestamp())}.png"
     canvas.save(os.path.join(OUTPUT_PATH, output_filename))
-    print(f"Saved {output_filename}")
 
     return os.path.join(OUTPUT_PATH, output_filename)

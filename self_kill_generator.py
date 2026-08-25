@@ -76,7 +76,6 @@ def create_self_killfeed(name, agent, weapon,
     suicide_bg = ENEMY_SUICIDE_COLOR if is_enemy_kill else SUICIDE_BG_COLOR
     killer_hl = ENEMY_BG_COLOR if is_enemy_kill else TEAL_HIGHLIGHT
     suicide_hl = ENEMY_SUICIDE_COLOR if is_enemy_kill else SUICIDE_HIGHLIGHT
-    font = ImageFont.truetype(FONT_PATH, FONT_SIZE)
 
     agent_img = unpremultiply(Image.open(os.path.join(ASSETS_PATH, "agents", agent)).resize(AGENT_ICON_SIZE))
 
@@ -230,6 +229,5 @@ def create_self_killfeed(name, agent, weapon,
     suffix = f"_{tags}" if tags else ""
     output_filename = f"self_{name}{suffix}_{int(datetime.now().timestamp())}.png"
     canvas.save(os.path.join(OUTPUT_PATH, output_filename))
-    print(f"Saved {output_filename}")
 
     return os.path.join(OUTPUT_PATH, output_filename)

@@ -993,27 +993,6 @@
     })();
 
     setTimeout(triggerPreview, 100);
-
-    // ── Validation ───────────────────────────────────────────────
-
-    function validateForm() {
-      var valid = true;
-      document.querySelectorAll(".field-error").forEach(function (el) { el.innerText = ""; });
-      if (!selfKillCheck.checked) {
-        var rev = isReviveMode();
-        var k = killerNameInput.value.trim();
-        var v = victimNameInput.value.trim();
-        if (!k) {
-          document.getElementById("killer_name_error").innerText = rev ? "ENTER A REVIVER NAME" : "ENTER A KILLER NAME";
-          valid = false;
-        }
-        if (!v) {
-          document.getElementById("victim_name_error").innerText = rev ? "ENTER A REVIVED NAME" : "ENTER A VICTIM NAME";
-          valid = false;
-        }
-      }
-      return valid;
-    }
   </script>
 </body>
 
