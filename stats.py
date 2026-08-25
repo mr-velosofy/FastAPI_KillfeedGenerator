@@ -297,8 +297,10 @@ def _weighted_count(c, where):
     return round(float(row["n"])) if row else 0
 
 
-def collect_digest(since):
-    with _connect() as c:
+def collect_digest(since, shared_conn=None):
+    c = shared_conn or _connect()
+    owns_conn = shared_conn is None
+    try:
         gens_since_raw = c.execute(
             "SELECT kind, count(*) AS n FROM events "
             "WHERE ts > %s GROUP BY kind", (since,)).fetchall()
@@ -342,6 +344,9 @@ def collect_digest(since):
             SELECT host, sum(count) AS total FROM referrers
             WHERE day >= CURRENT_DATE - 6
             GROUP BY host ORDER BY total DESC LIMIT 5""").fetchall()
+    finally:
+        if owns_conn:
+            c.close()
 
     modes_map = {(r["mode"] or "normal"): int(r["n"]) for r in modes}
     mode_total = sum(modes_map.values()) or 1
@@ -413,48 +418,64 @@ def build_embed(d):
     }
 
 
+def _try_advisory_lock(c, lock_id=12345):
+    """Try a session-level advisory lock. Caller must keep connection open."""
+    row = c.execute("SELECT pg_try_advisory_lock(%s)", (lock_id,)).fetchone()
+    return bool(row and row["pg_try_advisory_lock"])
+
+
 def post_digest():
     global _last_digest_at
     from discord_webhook import DiscordWebhook, DiscordEmbed
-    since = _last_digest_at or datetime.now(timezone.utc).replace(microsecond=0)
-    d = collect_digest(since)
-    webhook = DiscordWebhook(url=WEBHOOK_URL, username="Killfeed Stats")
-    embed = DiscordEmbed(title="📊 Killfeed Generator — Stats Digest", color="ff4655",
-                         timestamp=datetime.now(timezone.utc).isoformat())
-    embed.set_footer(text=f"every {DIGEST_SECONDS / 3600:.0f}h · day boundaries UTC")
 
-    def chain(vals):
-        return " · ".join(f"**{v}**" for v in vals)
+    lock_conn = _connect()
+    try:
+        if not _try_advisory_lock(lock_conn):
+            log.info("stats: digest skipped (another worker holds the lock)")
+            return
 
-    embed.add_embed_field(name="⚡ Generations",
-        value=f"Since last: **{d['gens_since']}** ({d['since_split']['previews']} prev / {d['since_split']['exports']} exp)\n"
-              f"Day {d['gens']['day']} · Week {d['gens']['week']} · Month {d['gens']['month']} · All-time **{d['gens']['all']}**")
-    embed.add_embed_field(name="👥 Unique visitors",
-        value=f"Today: **{d['uniq']['day']}** ({d['today_new']} new / {d['today_returning']} ret)\n"
-              f"Week {d['uniq']['week']} · Month {d['uniq']['month']} · All-time **{d['uniq']['all']}**")
-    embed.add_embed_field(name="🚪 Page visits",
-        value=f"D {d['visits']['day']} · W {d['visits']['week']} · M {d['visits']['month']} · All **{d['visits']['all']}**", inline=True)
-    embed.add_embed_field(name="🟢 Live",
-        value=f"Online now: **{d['online']}** · peak since last: **{d['peak']}**", inline=True)
-    if d["top_agents"]:
-        embed.add_embed_field(name="🔫 Top agents (7d)",
-            value=chain([f"{a} ({n})" for a, n in d["top_agents"]]), inline=True)
-    if d["top_weapons"]:
-        embed.add_embed_field(name="⚔️ Top weapons (7d)",
-            value=chain([f"{w} ({n})" for w, n in d["top_weapons"]]), inline=True)
-    if d["mode_mix"]:
-        embed.add_embed_field(name="🎛 Mode mix (all-time)",
-            value=chain([f"{m} {p}%" for m, p in d["mode_mix"]]), inline=True)
-    if d["top_refs"]:
-        embed.add_embed_field(name="🔗 Top referrers (7d)",
-            value=chain([f"{h} ({n})" for h, n in d["top_refs"]]), inline=False)
+        since = _last_digest_at or datetime.now(timezone.utc).replace(microsecond=0)
+        d = collect_digest(since, lock_conn)
 
-    webhook.add_embed(embed)
-    resp = webhook.execute()
-    if resp.status_code not in (200, 204):
-        raise RuntimeError(f"Discord {resp.status_code}: {resp.text[:200]}")
-    _last_digest_at = datetime.now(timezone.utc)
-    log.info("stats: digest posted")
+        webhook = DiscordWebhook(url=WEBHOOK_URL, username="Killfeed Stats")
+        embed = DiscordEmbed(title="📊 Killfeed Generator — Stats Digest", color="ff4655",
+                             timestamp=datetime.now(timezone.utc).isoformat())
+        embed.set_footer(text=f"every {DIGEST_SECONDS / 3600:.0f}h · day boundaries UTC")
+
+        def chain(vals):
+            return " · ".join(f"**{v}**" for v in vals)
+
+        embed.add_embed_field(name="⚡ Generations",
+            value=f"Since last: **{d['gens_since']}** ({d['since_split']['previews']} prev / {d['since_split']['exports']} exp)\n"
+                  f"Day {d['gens']['day']} · Week {d['gens']['week']} · Month {d['gens']['month']} · All-time **{d['gens']['all']}**")
+        embed.add_embed_field(name="👥 Unique visitors",
+            value=f"Today: **{d['uniq']['day']}** ({d['today_new']} new / {d['today_returning']} ret)\n"
+                  f"Week {d['uniq']['week']} · Month {d['uniq']['month']} · All-time **{d['uniq']['all']}**")
+        embed.add_embed_field(name="🚪 Page visits",
+            value=f"D {d['visits']['day']} · W {d['visits']['week']} · M {d['visits']['month']} · All **{d['visits']['all']}**", inline=True)
+        embed.add_embed_field(name="🟢 Live",
+            value=f"Online now: **{d['online']}** · peak since last: **{d['peak']}**", inline=True)
+        if d["top_agents"]:
+            embed.add_embed_field(name="🔫 Top agents (7d)",
+                value=chain([f"{a} ({n})" for a, n in d["top_agents"]]), inline=True)
+        if d["top_weapons"]:
+            embed.add_embed_field(name="⚔️ Top weapons (7d)",
+                value=chain([f"{w} ({n})" for w, n in d["top_weapons"]]), inline=True)
+        if d["mode_mix"]:
+            embed.add_embed_field(name="🎛 Mode mix (all-time)",
+                value=chain([f"{m} {p}%" for m, p in d["mode_mix"]]), inline=True)
+        if d["top_refs"]:
+            embed.add_embed_field(name="🔗 Top referrers (7d)",
+                value=chain([f"{h} ({n})" for h, n in d["top_refs"]]), inline=False)
+
+        webhook.add_embed(embed)
+        resp = webhook.execute()
+        if resp.status_code not in (200, 204):
+            raise RuntimeError(f"Discord {resp.status_code}: {resp.text[:200]}")
+        _last_digest_at = datetime.now(timezone.utc)
+        log.info("stats: digest posted")
+    finally:
+        lock_conn.close()
 
 
 # ── background loops ────────────────────────────────────────────────────────
