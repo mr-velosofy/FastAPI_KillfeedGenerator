@@ -250,21 +250,15 @@ body {
 }
 
 .preview-live {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   letter-spacing: 0.2em;
   color: #92D7C7;
   text-transform: uppercase;
 }
 
-.live-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #92D7C7;
-  animation: pulse-dot 2s ease-in-out infinite;
+.ls-inner {
+  transition: opacity 0.4s ease;
+  opacity: 1;
 }
 
 @keyframes pulse-dot {
@@ -971,9 +965,8 @@ form {
   }
 
 /* ── live stats in preview topbar ── */
-.ls-text {
-  transition: opacity 0.4s ease;
-  opacity: 1;
+.preview-live {
+  font-size: 0.5rem;
 }
 
 .preview-topbar {
@@ -982,15 +975,6 @@ form {
 
   .preview-meta {
     font-size: 0.65rem;
-  }
-
-  .preview-live {
-    font-size: 0.6rem;
-  }
-
-  .live-dot {
-    width: 7px;
-    height: 7px;
   }
 
   .preview-body {

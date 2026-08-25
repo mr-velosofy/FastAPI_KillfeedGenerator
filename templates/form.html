@@ -156,7 +156,7 @@
     <div class="preview-panel" id="preview-box">
       <div class="preview-topbar">
         <span class="preview-meta">// PREVIEW COMPOSITION</span>
-        <span class="preview-live" id="ls-root"><span class="live-dot"></span><span class="ls-text" id="ls-text">LIVE</span></span>
+        <span class="preview-live" id="ls-root"><span class="ls-text" id="ls-text"><span class="ls-inner" id="ls-inner">Online</span></span></span>
       </div>
       <div class="preview-body">
         <div class="preview-image-wrap">
@@ -910,29 +910,58 @@
         k.value = document.getElementById("killer_agent").value;
         v.value = document.getElementById("victim_agent").value;
       }
+      k.dataset.auto = "1";
+      v.dataset.auto = "1";
+    })();
+
+    // Track agent→nick sync: update nick only if it was auto-set
+    (function initAgentNickSync() {
+      var lastKillerAgent = killerAgentSelect.value;
+      var lastVictimAgent = victimAgentSelect.value;
+
+      // any manual edit clears the auto flag
+      killerNameInput.addEventListener("input", function () { delete killerNameInput.dataset.auto; });
+      victimNameInput.addEventListener("input", function () { delete victimNameInput.dataset.auto; });
+
+      killerAgentSelect.addEventListener("change", function () {
+        if (killerNameInput.dataset.auto) {
+          killerNameInput.value = this.value;
+        }
+        lastKillerAgent = this.value;
+      });
+      victimAgentSelect.addEventListener("change", function () {
+        if (victimNameInput.dataset.auto) {
+          victimNameInput.value = this.value;
+        }
+        lastVictimAgent = this.value;
+      });
     })();
 
     initAllDropdowns();
     handleReviveInit();
 
-    // ── Live stats: alternate online / feeds with smooth fade ─────
-    var lsText = document.getElementById("ls-text");
+    // ── Live stats: fade between online / feeds ───────────────────
+    var lsInner = document.getElementById("ls-inner");
     var lsOnline = 0, lsToday = 0, lsShowOnline = true;
-    function lsUpdate() {
-      var label = lsShowOnline
-        ? lsOnline + " User" + (lsOnline !== 1 ? "s" : "") + " Online"
-        : lsToday + " Generation" + (lsToday !== 1 ? "s" : "");
-      lsText.textContent = label;
+
+    function lsLabel() {
+      return lsShowOnline
+        ? lsOnline + " Online"
+        : lsToday + " Feeds (24h)";
     }
-    function lsFade() {
-      lsText.style.opacity = "0";
+
+    function lsCycle() {
+      lsInner.style.opacity = "0";
       setTimeout(function () {
         lsShowOnline = !lsShowOnline;
-        lsUpdate();
-        lsText.style.opacity = "1";
+        lsInner.textContent = lsLabel();
+        lsInner.style.opacity = "1";
       }, 400);
     }
-    setInterval(lsFade, 4000);
+
+    setInterval(lsCycle, 4000);
+    lsInner.textContent = lsLabel();
+
     function refreshLiveStats() {
       fetch("/api/stats/public", { cache: "no-store" })
         .then(function (r) { return r.ok ? r.json() : null; })
@@ -940,7 +969,6 @@
           if (!s) return;
           lsOnline = s.online || 0;
           lsToday = s.today || 0;
-          lsUpdate();
         })
         .catch(function () {});
       setTimeout(refreshLiveStats, 60000);
