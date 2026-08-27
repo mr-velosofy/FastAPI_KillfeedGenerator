@@ -380,6 +380,51 @@ body[data-layout="isot"] .footer-credit {
   color: var(--ink-mute);
 }
 
+/* ---------- Coffee button (bottom-right, isot only) ---------- */
+body[data-layout="isot"] .coffee-btn {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--gold);
+  color: var(--gold-ink);
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: .03em;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(255, 216, 77, .4);
+  transition: box-shadow .15s, transform .15s;
+}
+
+body[data-layout="isot"] .coffee-btn:hover {
+  box-shadow: 0 10px 30px rgba(255, 216, 77, .55);
+  transform: translateY(-2px);
+}
+
+body[data-layout="isot"] .coffee-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+@media (max-width: 900px) {
+  body[data-layout="isot"] .coffee-btn {
+    right: 12px;
+    bottom: 12px;
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+
+  body[data-layout="isot"] .coffee-label {
+    display: none;
+  }
+}
+
 /* ---------- Responsive tweaks ---------- */
 @media (max-width: 900px) {
   body[data-layout="isot"] {
