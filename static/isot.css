@@ -67,26 +67,29 @@ body[data-layout="isot"] .page-skeleton {
 
 /* Dropdown / sticky panel backgrounds become glass on isot */
 body[data-layout="isot"] .preview-panel {
-  background: rgba(8, 14, 20, .55);
+  background: transparent;
   border: 1px solid var(--card-border);
   border-radius: var(--radius-lg);
   box-shadow: inset 0 0 0 1px var(--card-border), var(--shadow);
 }
 
-/* Blurred isot_bg.webp fills the preview panel behind its content */
+/* Blurred isot_bg.webp fills the preview panel behind its content,
+   with a black rgb(8 14 20 / 20%) overlay on top of the image */
 body[data-layout="isot"] .preview-panel::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: url('/static/isot_bg.webp') center/cover no-repeat;
+  background:
+    linear-gradient(rgba(8, 14, 20, .20), rgba(8, 14, 20, .20)),
+    url('/static/isot_bg.webp') center/cover no-repeat;
   filter: blur(12px);
   transform: scale(1.06);
 }
 
-/* Config/regular cards: slightly darker glass so text is easy to read */
+/* Config/regular cards: same black overlay glass so text is easy to read */
 body[data-layout="isot"] .config-panel {
-  background: rgba(8, 14, 20, .50);
+  background: rgba(8, 14, 20, .20);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--card-border);
@@ -103,7 +106,7 @@ body[data-layout="isot"] .preview-panel {
   z-index: 50;
   border: 1px solid var(--card-border);
   border-radius: var(--radius-lg);
-  background: rgba(8, 14, 20, .72);
+  background: transparent;
 }
 
 body[data-layout="isot"] .preview-topbar {
