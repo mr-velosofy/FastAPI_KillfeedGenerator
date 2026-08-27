@@ -28,10 +28,11 @@
 }
 
 /* ---------- Fonts & page background ---------- */
+/* Neutral dark glass (no color tint) so the host site shows through */
 [data-layout="isot"] body,
 body[data-layout="isot"] {
   font-family: var(--font);
-  --bg-grad-glass: radial-gradient(130% 100% at 30% 0%, rgba(30, 111, 168, .55) 0%, rgba(26, 61, 52, .55) 45%, rgba(10, 23, 16, .65) 100%);
+  --bg-grad-glass: rgba(0, 0, 0, .12);
   background: var(--bg-grad-glass);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -44,7 +45,7 @@ body[data-layout="isot"] {
 
 /* Skeleton matches the new background so no flash */
 body[data-layout="isot"] .page-skeleton {
-  background: var(--bg-grad-glass);
+  background: rgba(0, 0, 0, .12);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
