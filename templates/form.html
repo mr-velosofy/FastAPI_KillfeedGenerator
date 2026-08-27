@@ -87,6 +87,12 @@
   <link rel="manifest" href="/static/favicon/site.webmanifest">
 
   <link rel="stylesheet" href="/static/style.css?v={{ css_version }}">
+  {% if layout == "isot" %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Chakra+Petch:wght@600;700&display=swap">
+  <link rel="stylesheet" href="/static/isot.css?v={{ isot_css_version }}">
+  {% endif %}
   <link rel="preconnect" href="https://cdn.statically.io">
   <link rel="dns-prefetch" href="https://cdn.statically.io">
   {% set CDN_BASE = 'https://cdn.statically.io/gh/mr-velosofy/FastAPI_KillfeedGenerator@main/assets/' %}
@@ -105,7 +111,7 @@
   {% endfor %}
 </head>
 
-<body>
+<body data-layout="{{ layout }}">
   <div class="bg-overlay"></div>
 
   <!-- PAGE SKELETON (removed once the first preview arrives) -->
@@ -278,6 +284,7 @@
             <span class="checkbox-label">ME(P2)</span>
           </label>
           <input type="hidden" name="me_side" id="me-side-input" value="{{ form.get('me_side', '') }}">
+          <input type="hidden" name="layout" id="layout-input" value="{{ layout }}">
         </div>
 
         <!-- EXPORT -->

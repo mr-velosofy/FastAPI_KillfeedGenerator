@@ -195,7 +195,8 @@ async def api_stats_public():
 
 
 @app.get("/", response_class=HTMLResponse)
-async def form_page(request: Request):
+async def form_page(request: Request, layout: str = Query("default")):
+    layout = layout if layout in ("isot", "isot111") else "default"
     vid, new_cookie = stats_mod.ensure_vid(request.cookies.get("vf_vid"))
     stats_mod.page_hit(vid, request.headers.get("referer"))
     response = templates.TemplateResponse(
@@ -203,11 +204,13 @@ async def form_page(request: Request):
         name="form.html",
         context={
             "form": {},
+            "layout": layout,
             "agents": AGENTS,
             "weapons": WEAPONS,
             "abilities": ABILITIES,
             "special": SPECIAL,
             "css_version": file_version(os.path.join("static", "style.css")),
+            "isot_css_version": file_version(os.path.join("static", "isot.css")),
             "image_url": None,
             "error": None,
         },
@@ -231,8 +234,10 @@ async def generate_and_preview(
     is_enemy_kill: bool = Form(False),
     is_self_kill: bool = Form(False),
     me_side: str = Form(""),
-    numeral: str = Form(None)
+    numeral: str = Form(None),
+    layout: str = Form("default")
 ):
+    layout = layout if layout in ("isot", "isot111") else "default"
     numeral_valid = ['3', '4', '5', '6', '7']
     error = None
     image_url = None
@@ -326,7 +331,9 @@ async def generate_and_preview(
             "weapons": WEAPONS,
             "abilities": ABILITIES,
             "special": SPECIAL,
+            "layout": layout,
             "css_version": file_version(os.path.join("static", "style.css")),
+            "isot_css_version": file_version(os.path.join("static", "isot.css")),
             "image_url": image_url,
             "image_filename": image_filename,
             "error": error,

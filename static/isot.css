@@ -1,0 +1,333 @@
+/* ===== ISOT THEME (layout=isot) ===== */
+/* Optional visual skin mirroring isot111.com "Clear Sky Serenity".
+   Everything here is scoped under [data-layout="isot"] so the default
+   theme is never touched. To revert, delete this whole block + the
+   <link> gates in templates/form.html. */
+
+/* ---------- Design tokens (from isot111.com) ---------- */
+[data-layout="isot"] {
+  --bg-grad: radial-gradient(130% 100% at 30% 0%, #1E6FA8 0%, #1a3d34 45%, #0a1710 100%);
+  --accent: #6FA8D4;
+  --accent-ink: #2F4A22;
+  --gold: #FFD84D;
+  --gold-ink: #141a12;
+  --ink: #CFE4F2;
+  --ink-soft: rgba(207, 228, 242, .82);
+  --ink-mute: rgba(207, 228, 242, .58);
+  --card: #16281f;
+  --card-hi: #1f3a2c;
+  --card-border: rgba(111, 168, 212, .45);
+  --radius: 18px;
+  --radius-lg: 24px;
+  --radius-sm: 12px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, .25);
+  --maxw-wide: 1080px;
+  --gap: 14px;
+  --font: 'Nunito', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-display: 'Chakra Petch', var(--font);
+}
+
+/* ---------- Fonts & page background ---------- */
+[data-layout="isot"] body,
+body[data-layout="isot"] {
+  font-family: var(--font);
+  background: var(--bg-grad);
+  background-attachment: fixed;
+}
+
+body[data-layout="isot"] {
+  padding: 3rem;
+}
+
+/* Skeleton matches the new background so no flash */
+body[data-layout="isot"] .page-skeleton {
+  background: var(--bg-grad);
+}
+
+/* Dropdown / sticky panel backgrounds become glass on isot */
+body[data-layout="isot"] .preview-panel,
+body[data-layout="isot"] .config-panel {
+  background: rgba(255, 255, 255, .14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 0 0 1px var(--card-border), var(--shadow);
+}
+
+body[data-layout="isot"] .preview-topbar {
+  background: rgba(255, 255, 255, .06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--card-border);
+}
+
+/* ---------- Headings / display font ---------- */
+body[data-layout="isot"] .section-title,
+body[data-layout="isot"] .label-tiny,
+body[data-layout="isot"] .seg-btn,
+body[data-layout="isot"] .btn-export,
+body[data-layout="isot"] .checkbox-label,
+body[data-layout="isot"] .preview-meta,
+body[data-layout="isot"] .preview-live,
+body[data-layout="isot"] .preview-note {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+body[data-layout="isot"] .section-title {
+  font-size: 2rem;
+  color: #fff;
+}
+
+body[data-layout="isot"] .label-tiny,
+body[data-layout="isot"] .preview-meta {
+  color: var(--ink-mute);
+}
+
+body[data-layout="isot"] .section-rule {
+  background: linear-gradient(90deg, var(--card-border) 0%, var(--card-border) 80%, transparent 100%);
+}
+
+/* ---------- Segmented control / primary pill ---------- */
+body[data-layout="isot"] .segmented {
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 4px;
+}
+
+body[data-layout="isot"] .seg-btn {
+  color: var(--ink-mute);
+  border-right: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+}
+
+body[data-layout="isot"] .seg-btn:last-child {
+  border-right: none;
+}
+
+body[data-layout="isot"] .seg-btn:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, .06);
+}
+
+body[data-layout="isot"] .seg-btn.active {
+  background: var(--gold);
+  color: var(--gold-ink);
+  box-shadow: 0 0 18px rgba(255, 216, 77, .45);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .15);
+}
+
+body[data-layout="isot"] .seg-btn.active:hover {
+  color: var(--gold-ink);
+  background: var(--gold);
+}
+
+/* ---------- Cards / panels / inputs (glass) ---------- */
+body[data-layout="isot"] .input-item input,
+body[data-layout="isot"] .input-item select,
+body[data-layout="isot"] .cdrop-trigger,
+body[data-layout="isot"] .stepper,
+body[data-layout="isot"] .checkbox-box {
+  background: rgba(255, 255, 255, .10);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .04);
+}
+
+body[data-layout="isot"] .input-item input::placeholder {
+  color: var(--ink-mute);
+}
+
+body[data-layout="isot"] .cdrop-text {
+  color: var(--ink);
+}
+
+body[data-layout="isot"] .cdrop-img,
+body[data-layout="isot"] .cdrop-img-placeholder,
+body[data-layout="isot"] .cdrop-opt-img,
+body[data-layout="isot"] .cdrop-opt-img-placeholder {
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+}
+
+body[data-layout="isot"] .cdrop-menu {
+  background: rgba(22, 40, 31, .92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+}
+
+body[data-layout="isot"] .cdrop-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body[data-layout="isot"] .cdrop-menu::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+}
+
+body[data-layout="isot"] .cdrop-opt {
+  color: var(--ink-soft);
+}
+
+body[data-layout="isot"] .cdrop-opt:hover {
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+}
+
+body[data-layout="isot"] .cdrop-opt.selected {
+  color: var(--gold);
+  background: rgba(255, 216, 77, .12);
+}
+
+body[data-layout="isot"] .cdrop-empty {
+  color: var(--ink-mute);
+}
+
+/* ---------- Buttons & stepper accent ---------- */
+body[data-layout="isot"] .btn-export {
+  background: var(--gold);
+  color: var(--gold-ink);
+  border: none;
+  border-radius: 999px;
+  font-weight: 800;
+  box-shadow: 0 8px 24px rgba(255, 216, 77, .35);
+  transition: box-shadow .15s, transform .15s;
+}
+
+body[data-layout="isot"] .btn-export:hover {
+  opacity: 1;
+  box-shadow: 0 10px 30px rgba(255, 216, 77, .5);
+  transform: translateY(-1px);
+}
+
+body[data-layout="isot"] .stepper-btn {
+  color: var(--gold);
+}
+
+body[data-layout="isot"] .stepper-btn:hover {
+  background: rgba(255, 216, 77, .12);
+  color: var(--gold);
+}
+
+body[data-layout="isot"] .stepper-value {
+  color: var(--ink);
+  border-color: var(--card-border);
+}
+
+/* ---------- Checkboxes ---------- */
+body[data-layout="isot"] .checkbox-box:hover {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, .14);
+}
+
+body[data-layout="isot"] .checkbox-box input[type="checkbox"] {
+  background: rgba(255, 255, 255, .10);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+}
+
+body[data-layout="isot"] .checkbox-box input[type="checkbox"]:checked {
+  background: var(--gold);
+  border-color: var(--gold);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 14 14' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 7l3 3 5-5' stroke='%23141a12' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+body[data-layout="isot"] .checkbox-label {
+  color: var(--ink-soft);
+}
+
+/* ---------- Swap button ---------- */
+body[data-layout="isot"] .btn-swap {
+  background: rgba(255, 255, 255, .10);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  color: var(--ink-soft);
+}
+
+body[data-layout="isot"] .btn-swap:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+  background: rgba(255, 216, 77, .10);
+}
+
+/* ---------- Focus ---------- */
+body[data-layout="isot"] .input-item input:focus,
+body[data-layout="isot"] .input-item select:focus,
+body[data-layout="isot"] .cdrop-trigger:focus,
+body[data-layout="isot"] .checkbox-box input[type="checkbox"]:focus-visible {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(255, 216, 77, .25);
+}
+
+/* ---------- Preview notes ---------- */
+body[data-layout="isot"] .preview-live {
+  color: var(--gold);
+}
+
+body[data-layout="isot"] .preview-note {
+  color: var(--gold);
+  border-top: 1px solid var(--card-border);
+}
+
+body[data-layout="isot"] .preview-img {
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Error ---------- */
+body[data-layout="isot"] .error-bar {
+  background: rgba(20, 26, 18, .6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-left: 3px solid var(--gold);
+  color: var(--gold);
+  border-radius: var(--radius-sm);
+}
+
+body[data-layout="isot"] .field-error {
+  color: var(--gold);
+}
+
+/* ---------- Skeleton shimmer (tinted) ---------- */
+body[data-layout="isot"] .sk {
+  background: linear-gradient(90deg, transparent,
+    rgba(111, 168, 212, .08) 35%,
+    rgba(255, 216, 77, .12) 50%,
+    rgba(111, 168, 212, .08) 65%,
+    transparent);
+}
+
+body[data-layout="isot"] .sk-export {
+  background: linear-gradient(90deg, rgba(255, 216, 77, .12) 25%, rgba(255, 216, 77, .22) 50%, rgba(255, 216, 77, .12) 75%);
+}
+
+/* ---------- Footer ---------- */
+body[data-layout="isot"] .footer-credit {
+  color: var(--ink-mute);
+}
+
+/* ---------- Responsive tweaks ---------- */
+@media (max-width: 900px) {
+  body[data-layout="isot"] {
+    padding: 0;
+  }
+
+  body[data-layout="isot"] .preview-panel {
+    background: rgba(255, 255, 255, .14);
+  }
+
+  body[data-layout="isot"] .footer-credit {
+    background: rgba(10, 23, 16, .55);
+  }
+}
+
+/* ===== END ISOT THEME ===== */
