@@ -51,9 +51,18 @@ body[data-layout="isot"] .page-skeleton {
 }
 
 /* Dropdown / sticky panel backgrounds become glass on isot */
-body[data-layout="isot"] .preview-panel,
+body[data-layout="isot"] .preview-panel {
+  background: rgba(255, 255, 255, .10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 0 0 1px var(--card-border), var(--shadow);
+}
+
+/* Config/regular cards: slightly darker glass so text is easy to read */
 body[data-layout="isot"] .config-panel {
-  background: rgba(255, 255, 255, .14);
+  background: rgba(8, 14, 20, .50);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--card-border);
@@ -62,15 +71,17 @@ body[data-layout="isot"] .config-panel {
 }
 
 /* Preview panel sticks to the top of the viewport on every screen.
-   Its own backdrop-filter blurs any section content scrolling underneath. */
+   A moderately-transparent dark glass keeps it legible while its own
+   backdrop-filter visibly blurs section content scrolling underneath. */
 body[data-layout="isot"] .preview-panel {
   position: sticky;
   top: 0;
   z-index: 50;
   border-bottom: 1px solid var(--card-border);
-  background: rgba(8, 16, 24, .62);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  border-radius: 0;
+  background: rgba(10, 18, 26, .40);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
 }
 
 body[data-layout="isot"] .preview-topbar {
