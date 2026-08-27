@@ -92,6 +92,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Chakra+Petch:wght@600;700&display=swap">
   <link rel="stylesheet" href="/static/isot.css?v={{ isot_css_version }}">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/MorphSVGPlugin.min.js"></script>
   {% endif %}
   <link rel="preconnect" href="https://cdn.statically.io">
   <link rel="dns-prefetch" href="https://cdn.statically.io">
@@ -288,19 +290,40 @@
         </div>
 
         <!-- EXPORT -->
-        <button type="button" class="btn-export" onclick="downloadPreview()">EXPORT PNG</button>
+        <div class="export-row">
+          <button type="button" class="btn-export" onclick="downloadPreview()">EXPORT PNG</button>
+          {% if layout == "isot" %}
+          <a class="coffee-btn" href="https://buymeacoffee.com/mr.velosofy" target="_blank" rel="noopener" aria-label="Buy me a coffee">
+            <svg class="coffee-svg" viewBox="0 0 100 100" width="28" height="28" aria-hidden="true">
+              <!-- $ -->
+              <path id="coffee-dollar"
+                d="M50 10 V90 M65 27 C61 21 55 18 49 18 C39 18 33 23 33 31 C33 39 39 42 50 45 C61 48 67 52 67 61 C67 70 60 77 50 77 C41 77 34 73 30 67"/>
+              <!-- Cup -->
+              <path id="coffee-cup" visibility="hidden"
+                d="M20 30 H72 V48 C72 64 63 73 46 73 C29 73 20 64 20 48 Z M72 38 H79 C87 38 89 44 89 50 C89 57 85 62 77 62 H69 M30 84 H65"/>
+            </svg>
+          </a>
+          {% endif %}
+        </div>
+
+        {% if layout == "isot" %}
+        <script>
+          gsap.registerPlugin(MorphSVGPlugin);
+          gsap.to("#coffee-dollar", {
+            duration: 1.5,
+            morphSVG: { shape: "#coffee-cup" },
+            ease: "power2.inOut",
+            repeat: -1,
+            yoyo: true,
+            repeatDelay: 3
+          });
+        </script>
+        {% endif %}
 
       </form>
     </div>
 
     <div class="footer-credit">made with &#x2764; by mr_velosofy</div>
-
-    {% if layout == "isot" %}
-    <a class="coffee-btn" href="https://buymeacoffee.com/mr.velosofy" target="_blank" rel="noopener" aria-label="Buy me a coffee">
-      <span class="coffee-icon">&#9749;</span>
-      <span class="coffee-label">Buy me a coffee</span>
-    </a>
-    {% endif %}
 
   </div>
 
