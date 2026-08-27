@@ -67,7 +67,8 @@ body[data-layout="isot"] .page-skeleton {
 
 /* Dropdown / sticky panel backgrounds become glass on isot */
 body[data-layout="isot"] .preview-panel {
-  background: rgba(255, 255, 255, .10);
+  background: linear-gradient(rgba(9, 15, 22, .55), rgba(9, 15, 22, .55)),
+    url('/static/isot_bg.webp') center/cover no-repeat;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--card-border);
@@ -86,16 +87,18 @@ body[data-layout="isot"] .config-panel {
 }
 
 /* Preview panel sticks to the top of the viewport on every screen.
-   A solid backdrop hides whatever scrolls underneath it. */
+   Uses the blurred isot_bg.webp fill with a dark overlay so it stays
+   opaque and hides whatever scrolls underneath it. */
 body[data-layout="isot"] .preview-panel {
   position: sticky;
   top: 0;
   z-index: 50;
   border-bottom: 1px solid var(--card-border);
   border-radius: 0;
-  background: rgba(9, 15, 22, .96);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: linear-gradient(rgba(9, 15, 22, .85), rgba(9, 15, 22, .85)),
+    url('/static/isot_bg.webp') center/cover no-repeat;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 body[data-layout="isot"] .preview-topbar {
