@@ -31,7 +31,10 @@
 [data-layout="isot"] body,
 body[data-layout="isot"] {
   font-family: var(--font);
-  background: var(--bg-grad);
+  --bg-grad-glass: radial-gradient(130% 100% at 30% 0%, rgba(30, 111, 168, .55) 0%, rgba(26, 61, 52, .55) 45%, rgba(10, 23, 16, .65) 100%);
+  background: var(--bg-grad-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   background-attachment: fixed;
 }
 
@@ -41,7 +44,9 @@ body[data-layout="isot"] {
 
 /* Skeleton matches the new background so no flash */
 body[data-layout="isot"] .page-skeleton {
-  background: var(--bg-grad);
+  background: var(--bg-grad-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 /* Dropdown / sticky panel backgrounds become glass on isot */
@@ -64,7 +69,7 @@ body[data-layout="isot"] .preview-panel {
 }
 
 body[data-layout="isot"] .preview-topbar {
-  background: rgba(255, 255, 255, .06);
+  background: rgba(255, 216, 77, .10);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--card-border);
