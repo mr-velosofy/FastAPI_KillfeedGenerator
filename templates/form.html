@@ -90,7 +90,7 @@
   {% if layout == "isot" %}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Chakra+Petch:wght@600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&display=swap">
   <link rel="stylesheet" href="/static/isot.css?v={{ isot_css_version }}">
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/MorphSVGPlugin.min.js"></script>
@@ -162,10 +162,12 @@
 
     <!-- PREVIEW PANEL -->
     <div class="preview-panel" id="preview-box">
+      {% if layout != "isot" %}
       <div class="preview-topbar">
         <span class="preview-meta">// PREVIEW COMPOSITION</span>
         <span class="preview-live" id="ls-root"><span class="ls-text" id="ls-text"><span class="ls-inner" id="ls-inner">Online</span></span></span>
       </div>
+      {% endif %}
       <div class="preview-body">
         <div class="preview-image-wrap">
           <img src="{{ image_url or '' }}" alt="Preview" id="preview-img" class="preview-img">
@@ -176,7 +178,9 @@
 
     <!-- SECTION HEADER -->
     <div class="section-header">
+      {% if layout != "isot" %}
       <h2 class="section-title">SET UP KILL</h2>
+      {% endif %}
       <div class="section-rule"></div>
     </div>
 
@@ -190,7 +194,9 @@
 
       <!-- LOADOUT TYPE -->
       <div class="loadout-group">
+        {% if layout != "isot" %}
         <span class="label-tiny">LOADOUT TYPE</span>
+        {% endif %}
         <div class="segmented">
           <button type="button" class="seg-btn active" data-tab="weapons">GUNS</button>
           <button type="button" class="seg-btn" data-tab="abilities">ABILITIES</button>
@@ -979,6 +985,7 @@
 
     // ── Live stats: fade between online / feeds ───────────────────
     var lsInner = document.getElementById("ls-inner");
+    if (lsInner) {
     var lsOnline = 0, lsToday = 0, lsShowOnline = true;
 
     function lsLabel() {
@@ -1011,6 +1018,7 @@
       setTimeout(refreshLiveStats, 60000);
     }
     refreshLiveStats();
+    }
 
     // Preload all selector artwork from the CDN so dropdowns open instantly
     (function preloadAssets() {
