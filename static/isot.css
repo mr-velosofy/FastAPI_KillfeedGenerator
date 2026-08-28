@@ -144,7 +144,7 @@ body[data-layout="isot"] .preview-meta {
 }
 
 body[data-layout="isot"] .section-rule {
-  background: linear-gradient(90deg, var(--card-border) 0%, var(--card-border) 80%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, var(--card-border) 80%, transparent 100%);
 }
 
 /* ---------- Segmented control / primary pill ---------- */
