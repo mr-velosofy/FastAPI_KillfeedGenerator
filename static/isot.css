@@ -444,6 +444,115 @@ body[data-layout="isot"] #coffee-cup {
   stroke-linejoin: round;
 }
 
+/* ---------- Config panel scale-up & arrangement ---------- */
+body[data-layout="isot"] .config-panel {
+  padding: 40px 48px;
+}
+
+body[data-layout="isot"] .loadout-group {
+  gap: 18px;
+  margin-bottom: 40px;
+  padding-bottom: 30px;
+}
+
+body[data-layout="isot"] .label-tiny {
+  font-size: 0.95rem;
+}
+
+body[data-layout="isot"] .segmented {
+  padding: 6px;
+}
+
+body[data-layout="isot"] .seg-btn {
+  padding: 18px 52px;
+  font-size: 1.1rem;
+}
+
+/* Better arrangement: two clean rows via grid on PC */
+body[data-layout="isot"] .inputs-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 60px 1fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+body[data-layout="isot"] .inputs-row .input-item,
+body[data-layout="isot"] .inputs-row .input-item.grow2,
+body[data-layout="isot"] .inputs-row .input-item.narrow {
+  flex: none;
+  width: 100%;
+  min-width: 0;
+}
+
+body[data-layout="isot"] .inputs-row .input-item.grow2 {
+  grid-column: span 4;
+}
+
+body[data-layout="isot"] .inputs-row .input-item.narrow {
+  grid-column: span 1;
+}
+
+body[data-layout="isot"] .inputs-row .switch-item {
+  align-self: center;
+}
+
+/* Scale up field text & heights */
+body[data-layout="isot"] .input-item input,
+body[data-layout="isot"] .input-item select {
+  font-size: 1.3rem;
+  height: 62px;
+}
+
+body[data-layout="isot"] .cdrop-trigger {
+  height: 62px;
+}
+
+body[data-layout="isot"] .cdrop-img {
+  width: 44px;
+  height: 44px;
+}
+
+body[data-layout="isot"] .cdrop-text {
+  font-size: 1.15rem;
+}
+
+body[data-layout="isot"] .stepper {
+  height: 62px;
+}
+
+body[data-layout="isot"] .stepper-btn {
+  width: 54px;
+  font-size: 1.6rem;
+}
+
+body[data-layout="isot"] .stepper-value {
+  font-size: 1.4rem;
+}
+
+body[data-layout="isot"] .btn-swap {
+  width: 62px;
+  height: 62px;
+}
+
+body[data-layout="isot"] .checkbox-box {
+  min-height: 60px;
+  padding: 14px 24px;
+}
+
+body[data-layout="isot"] .checkbox-label {
+  font-size: 1rem;
+}
+
+body[data-layout="isot"] .checkbox-box input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
+
+body[data-layout="isot"] .btn-export {
+  font-size: 1.4rem;
+  padding: 22px 40px;
+}
+
 /* ---------- Responsive tweaks ---------- */
 @media (max-width: 900px) {
   body[data-layout="isot"] {
@@ -453,6 +562,52 @@ body[data-layout="isot"] #coffee-cup {
   body[data-layout="isot"] .preview-body {
     padding: 8px;
     min-height: 64px;
+  }
+
+  /* Config panel: single column, comfortable tap sizes on mobile */
+  body[data-layout="isot"] .config-panel {
+    padding: 24px 18px;
+  }
+
+  body[data-layout="isot"] .inputs-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  body[data-layout="isot"] .inputs-row .input-item.grow2,
+  body[data-layout="isot"] .inputs-row .input-item.narrow {
+    grid-column: span 1;
+  }
+
+  body[data-layout="isot"] .inputs-row .switch-item {
+    align-self: center;
+    margin: 0 auto;
+  }
+
+  body[data-layout="isot"] .input-item input,
+  body[data-layout="isot"] .input-item select {
+    font-size: 1.05rem;
+    height: 54px;
+  }
+
+  body[data-layout="isot"] .cdrop-trigger,
+  body[data-layout="isot"] .stepper {
+    height: 54px;
+  }
+
+  body[data-layout="isot"] .seg-btn {
+    padding: 14px 22px;
+    font-size: 0.9rem;
+  }
+
+  body[data-layout="isot"] .checkbox-box {
+    min-height: 50px;
+    padding: 10px 16px;
+  }
+
+  body[data-layout="isot"] .btn-export {
+    font-size: 1.05rem;
+    padding: 16px 24px;
   }
 
   body[data-layout="isot"] .coffee-btn {
