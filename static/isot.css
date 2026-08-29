@@ -101,13 +101,9 @@ body[data-layout="isot"] .config-panel {
   box-shadow: inset 0 0 0 1px var(--card-border), var(--shadow);
 }
 
-/* Preview panel sticks to the top of the viewport on every screen.
-   Rounded edges; blurred isot_bg.webp shows behind (incl. under topbar)
-   and stays opaque enough to hide whatever scrolls underneath. */
+/* Preview panel: rounds and glass look on every screen. On PC it flows
+   with the page (unsticky); sticky to the top only on mobile. */
 body[data-layout="isot"] .preview-panel {
-  position: sticky;
-  top: 0;
-  z-index: 50;
   overflow: hidden;
   border: 1px solid var(--card-border);
   border-radius: var(--radius-lg);
@@ -231,11 +227,24 @@ body[data-layout="isot"] .cdrop-opt-img-placeholder {
 }
 
 body[data-layout="isot"] .cdrop-menu {
+  top: 100%;
+  bottom: auto;
   background: rgba(22, 40, 31, .92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--card-border);
-  border-radius: var(--radius-sm);
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  margin-bottom: 0;
+  padding-top: 4px;
+  max-height: 260px;
+  transform-origin: top;
+  animation: cdropPop .18s ease-out;
+}
+
+@keyframes cdropPop {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 body[data-layout="isot"] .cdrop-menu::-webkit-scrollbar-track {
@@ -592,6 +601,10 @@ body[data-layout="isot"] .btn-export {
   body[data-layout="isot"] .cdrop-trigger,
   body[data-layout="isot"] .stepper {
     height: 50px;
+  }
+
+  body[data-layout="isot"] .cdrop-menu {
+    max-height: 220px;
   }
 
   body[data-layout="isot"] .seg-btn {
