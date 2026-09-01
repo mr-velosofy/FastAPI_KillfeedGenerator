@@ -527,6 +527,15 @@ form {
   position: relative;
 }
 
+.cdrop-wrap select {
+  display: none;
+}
+
+#me-p1-toggle,
+#me-p2-toggle {
+  display: none;
+}
+
 .cdrop {
   position: relative;
   width: 100%;
